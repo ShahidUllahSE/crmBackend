@@ -33,7 +33,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Function to dynamically load route
 const loadRoutes = (app: Application) => {
   const routesPath = path.join(__dirname, "src/routes");
-  console.log("routes",loadRoutes)
+  // console.log("routes",loadRoutes)
   fs.readdirSync(routesPath).forEach((file) => {
     if (file.endsWith(".routes.ts")) {
       const route = require(path.join(routesPath, file));

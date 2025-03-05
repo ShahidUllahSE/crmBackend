@@ -16,7 +16,7 @@ const connectDB = async () => {
 
     // Force sync (WARNING: This will DROP and recreate tables)
     await db.sync({ alter: true }); 
-    console.log("✅ All models synchronized (Tables Created)");
+    // console.log("✅ All models synchronized (Tables Created)");
   } catch (error) {
     console.error("❌ Unable to connect to the database:", error);
   }

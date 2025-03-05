@@ -18,7 +18,7 @@ const connectDB = async () => {
     
     // Sync models (optional: use force: true to reset tables)
     await db.sync();
-    console.log("All models synchronized.");
+    // console.log("All models synchronized.");
   } catch (error) {
     console.error("Database connection error:", (error as Error).message);
   }

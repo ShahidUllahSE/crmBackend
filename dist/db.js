@@ -18,7 +18,7 @@ dotenv_1.default.config();
 const db = new sequelize_1.Sequelize("crm", "root", "", {
     host: process.env.DB_HOST,
     dialect: "mysql",
-    logging: console.log, // Enable logging to see SQL queries
+    // logging: console.log, // Enable logging to see SQL queries
 });
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
