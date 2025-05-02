@@ -12,7 +12,7 @@ interface UserModel extends Model<UserAttributes, UserCreationAttributes>, UserA
 }
 
 // Define the User model using sequelize.define (functional approach)
-const User = db.define<UserModel>("User", {
+export const User = db.define<UserModel>("User", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -178,3 +178,127 @@ User.beforeUpdate((user) => {
 });
 
 export default User;
+
+
+
+
+// User Model with proper role typing
+// import { DataTypes, Model, Optional, BelongsToGetAssociationMixin } from "sequelize";
+// import db from "../../db";
+// import Role, { RoleAttributes } from "./role.model";  // Import Role and its attributes
+// import { VendorAttributes } from "./vendor.model";
+// import { ClientAttributes } from "./client.model";
+
+// export interface UserAttributes {
+//   id: number;
+//   firstname: string;
+//   lastname: string;
+//   email: string;
+//   password: string;
+//   phone: string;
+//   address: string;
+//   website: string;
+//   linkedin: string;
+//   useruimage: string;
+//   block: boolean;
+//   referred_to: string;
+//   last_login: Date;
+//   token: string;
+//   roleId: number;
+//   created_at: Date;
+//   updated_at: Date;
+//   vendorData?: VendorAttributes;
+//   clientData?: ClientAttributes;
+// }
+
+// interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'created_at' | 'updated_at'> {}
+
+// interface UserModel extends Model<UserAttributes, UserCreationAttributes>, UserAttributes {
+//   role?: RoleAttributes;  // Use RoleAttributes as the type for role
+//   getRole: BelongsToGetAssociationMixin<typeof Role>;  // Access role using the correct type
+// }
+
+// const User = db.define<UserModel>("User", {
+//   id: {
+//     type: DataTypes.INTEGER,
+//     autoIncrement: true,
+//     primaryKey: true,
+//   },
+//   firstname: {
+//     type: DataTypes.STRING(250),
+//     allowNull: true,
+//   },
+//   lastname: {
+//     type: DataTypes.STRING(250),
+//     allowNull: true,
+//   },
+//   email: {
+//     type: DataTypes.STRING,
+//     allowNull: false,
+//     unique: true,
+//   },
+//   password: {
+//     type: DataTypes.STRING,
+//     allowNull: false,
+//   },
+//   phone: {
+//     type: DataTypes.STRING(100),
+//     allowNull: true,
+//   },
+//   address: {
+//     type: DataTypes.STRING(100),
+//     allowNull: true,
+//   },
+//   website: {
+//     type: DataTypes.STRING(100),
+//     allowNull: true,
+//   },
+//   linkedin: {
+//     type: DataTypes.STRING(100),
+//     allowNull: true,
+//   },
+//   useruimage: {
+//     type: DataTypes.STRING(250),
+//     allowNull: true,
+//   },
+//   block: {
+//     type: DataTypes.BOOLEAN,
+//     defaultValue: true,
+//   },
+//   referred_to: {
+//     type: DataTypes.STRING(250),
+//     allowNull: true,
+//   },
+//   last_login: {
+//     type: DataTypes.DATE,
+//     allowNull: true,
+//   },
+//   token: {
+//     type: DataTypes.TEXT,
+//     allowNull: true,
+//   },
+//   roleId: {
+//     type: DataTypes.INTEGER,
+//     references: {
+//       model: Role, // Reference the Role model
+//       key: "id",
+//     },
+//     allowNull: false,
+//     onDelete: 'CASCADE',
+//   },
+//   created_at: {
+//     type: DataTypes.DATE,
+//     defaultValue: DataTypes.NOW,
+//   },
+//   updated_at: {
+//     type: DataTypes.DATE,
+//     defaultValue: DataTypes.NOW,
+//   },
+// }, {
+//   tableName: "users",
+//   timestamps: true,
+// });
+
+// User.belongsTo(Role, { foreignKey: 'roleId', onDelete: 'CASCADE' });
+
+// export default User;

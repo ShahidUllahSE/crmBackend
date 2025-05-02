@@ -26,7 +26,7 @@ const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
         console.log("✅ Database connected successfully");
         // Force sync (WARNING: This will DROP and recreate tables)
         yield db.sync({ force: true });
-        console.log("✅ All models synchronized (Tables Created)");
+        // console.log("✅ All models synchronized (Tables Created)");
     }
     catch (error) {
         console.error("❌ Unable to connect to the database:", error);

@@ -1,4 +1,6 @@
 import { Optional } from "sequelize";
+import { VendorAttributes } from "../models/vendor.model";
+import { ClientAttributes } from "../models/client.model";
 
 // ✅ Define `UserAttributes` (Full user model)
 export interface UserAttributes {
@@ -14,7 +16,7 @@ export interface UserAttributes {
   linkedin?: string;
   useruimage?: string;
   vendor?: string;
-  userrole: "admin" | "vendor" | "client";
+  userrole?: "admin" | "vendor" | "client";
   smtpemail?: string;
   smtppassword?: string;
   smtpincomingserver?: string;
@@ -37,10 +39,13 @@ export interface UserAttributes {
   token?: string;
   created_at?: Date;
   updated_at?: Date;
+  vendorData?: VendorAttributes;
+  clientData?: ClientAttributes;
+  roleId?: number;
 }
 
-// ✅ Define `UserCreationAttributes` (For user registration, excluding auto-generated fields)
+// ✅ Define `UserCreationAttributes` (For user creation)
 export type UserCreationAttributes = Optional<
   UserAttributes,
-  "id" | "token" | "created_at" | "updated_at"
+  "id" | "created_at" | "updated_at" | "roleId"
 >;

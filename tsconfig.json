@@ -9,7 +9,10 @@
       "resolveJsonModule": true,
       "skipLibCheck": true
     },
-    "include": ["src"],
+   "include": [
+    "src/**/*.ts", 
+    "src/types/**/*.d.ts"  // Make sure TypeScript picks up your custom types
+  ],
     "exclude": ["node_modules", "dist"]
   }
   
