@@ -36,7 +36,6 @@ export const createUser = async (userData: Partial<UserAttributes>): Promise<Use
   
 
 
-
   export const loginUser = async (userData: { email: string, password: string }): Promise<any> => {
     console.log("User Data received:", userData);  
   
@@ -46,45 +45,45 @@ export const createUser = async (userData: Partial<UserAttributes>): Promise<Use
       throw new Error("Password is required!");
     }
     if (!email) {
-      throw new Error("email is required!");
+      throw new Error("Email is required!");
     }
   
-    // Find the user in the database
     const user = await User.findOne({ where: { email } });
     if (!user) {
       throw new Error("User not found!");
     }
   
-    // Ensure user.password is defined before comparing
     if (!user.password) {
       throw new Error("User password is missing!");
     }
   
-    // Compare the provided password with the hashed password stored in the DB
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new Error("Invalid credentials!");
     }
   
-    // Generate JWT token
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET as string, {
-      expiresIn: "1h",
-    });
+    // ✅ Include userrole in the token
+    const token = jwt.sign(
+      { id: user.id, email: user.email, userrole: user.userrole },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "1h" }
+    );
   
-    // Return the user data and token
+    // ✅ Ensure userrole is returned in the response
     return {
       user: {
         id: user.id,
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
-        userrole: user.userrole,
+        userrole: user.userrole, // ✅ Role returned to frontend
         block: user.block,
         last_login: user.last_login,
       },
       token,
     };
   };
+  
   
   
   export const getAllUsers = async (): Promise<UserAttributes[]> => {

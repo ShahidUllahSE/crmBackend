@@ -1,35 +1,57 @@
 import express, { Application } from "express";
 import dotenv from "dotenv";
-import db from "./db"; // Import the database connection
-import './src/models/user.model.ts'
-import app from './app'
+import db from "./db"; // Sequelize instance
+import './src/models/user.model'; // Ensure models are registered
+import './src/models/activitylog.model';
+import './src/models/notification.model';
+import http from "http";
+import { Server as SocketIOServer } from "socket.io";
+import app from './app'; // Your main Express app
+
 dotenv.config();
 
-// const app: Application = express();
+const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.json());
+// Create HTTP server and Socket.IO instance
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
-// Database Connection
+// Attach io to global to access in services
+declare global {
+  var io: SocketIOServer;
+}
+global.io = io;
+
+// Socket.IO connection handler
+io.on("connection", (socket) => {
+  const userId = socket.handshake.query.userId;
+  if (userId) {
+    socket.join(`user_${userId}`);
+    console.log(`User ${userId} connected to room user_${userId}`);
+  }
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+});
+
+// DB Connect & Server Start
 const connectDB = async () => {
   try {
     await db.authenticate();
     console.log("Database connected successfully.");
-    
-    // Sync models (optional: use force: true to reset tables)
-    await db.sync();
-    // console.log("All models synchronized.");
+    await db.sync(); // Sync all models
   } catch (error) {
     console.error("Database connection error:", (error as Error).message);
   }
 };
 
-// Start the server after DB connection
-const PORT = process.env.PORT || 3000;
 connectDB().then(() => {
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 });
-
-export default app;
