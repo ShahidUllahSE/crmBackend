@@ -14,7 +14,7 @@ app.use(cors());
 
 // Custom CORS Middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const allowedOrigin = process.env.FRONT_END_URL || "http://localhost:5173";
+  const allowedOrigin = process.env.FRONT_END_URL || "http://localhost:3001";
 
   res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
   res.setHeader("Access-Control-Allow-Credentials", "true");

@@ -3,6 +3,8 @@ import { createUser, deleteUser, getAllUsers, getUserById, loginUser, updateUser
 import { UserAttributes } from "../interfaces/user.interface";
 import User from "../models/user.model";  // Make sure the correct path is used
 
+// controllers/user.controller.ts
+
 export const registerUser = async (req: Request, res: Response): Promise<any> => {
   try {
     const userData: Partial<UserAttributes> = req.body;
@@ -15,6 +17,7 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
     // Call service function to create a user
     const user = await createUser(userData);
 
+    // Respond with success message and user info
     return res.status(201).json({ message: "User registered successfully!", user });
   } catch (error) {
     console.error("Registration Error:", error);
@@ -27,7 +30,8 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
 export const login = async (req: Request, res: Response): Promise<any> => {
   try {
     const { email, password } = req.body;
-console.log("req body",req.body)
+    console.log("req body", req.body);
+
     // Validate email and password
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required!" });
@@ -43,7 +47,6 @@ console.log("req body",req.body)
     return res.status(500).json({ message: "Something went wrong during login." });
   }
 };
-
 
 
 export const getUsers = async (req: Request, res: Response): Promise<any> => {

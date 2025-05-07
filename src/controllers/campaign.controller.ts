@@ -4,16 +4,16 @@ import * as CampaignService from "../services/campaign.service";
 // Create a new campaign
 export const createCampaignn = async (req: Request, res: Response): Promise<any> => {
   try {
-    const data = req.body;
-    console.log("Received data:", data);  // Log the received data
+    const fields = req.body as any[]; // Expecting an array of field objects including campaignName in at least the first one
 
-    // Pass the data to the service
-    const campaign = await CampaignService.createCampaign(data);
-    console.log("Created campaign:", campaign);  // Log the created campaign
+    if (!Array.isArray(fields) || fields.length === 0 || !fields[0].campaignName) {
+      return res.status(400).json({ message: "Invalid data. Must include campaignName and at least one field." });
+    }
 
-    return res.status(201).json(campaign);  // Return the created campaign
+    const campaign = await CampaignService.createCampaign(fields);
+    return res.status(201).json(campaign);
   } catch (error: any) {
-    console.error("Error in controller:", error);  // Log the error
+    console.error("Error in createCampaign controller:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -25,7 +25,7 @@ export const getAllCampaigns = async (req: Request, res: Response): Promise<any>
     if (!campaigns || campaigns.length === 0) {
       return res.status(404).json({ message: "No campaigns found" });
     }
-    return res.status(200).json(campaigns);  // Return the list of campaigns
+    return res.status(200).json(campaigns);
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
@@ -39,7 +39,7 @@ export const getCampaignById = async (req: Request, res: Response): Promise<any>
     if (!campaign) {
       return res.status(404).json({ message: "Campaign not found" });
     }
-    return res.status(200).json(campaign);  // Return the campaign
+    return res.status(200).json(campaign);
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
@@ -50,11 +50,12 @@ export const updateCampaign = async (req: Request, res: Response): Promise<any> 
   try {
     const { id } = req.params;
     const data = req.body;
+
     const campaign = await CampaignService.updateCampaign(Number(id), data);
     if (!campaign) {
       return res.status(404).json({ message: "Campaign not found" });
     }
-    return res.status(200).json(campaign);  // Return the updated campaign
+    return res.status(200).json(campaign);
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }

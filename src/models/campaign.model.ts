@@ -3,13 +3,14 @@ import db from "../../db";
 
 export interface CampaignAttributes {
   id: number;
+  campaignName: string; // ✅ Added
   col_name: string;
   col_slug: string;
-  col_type: "text" | "number" | "date" | "dropdown" | "radio" | "checkbox";  
+  col_type: "text" | "number" | "date" | "dropdown" | "radio" | "checkbox";
   default_value?: string;
-  options?: string[];  
+  options?: string[];
   multiple?: boolean;
-  dynamic_fields?: any; 
+  dynamic_fields?: any;
 }
 
 export interface CampaignCreationAttributes extends Optional<CampaignAttributes, "id"> {}
@@ -19,6 +20,10 @@ export const Campaign = db.define<Model<CampaignAttributes, CampaignCreationAttr
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
+  },
+  campaignName: { // ✅ Added
+    type: DataTypes.STRING(255),
+    allowNull: false,
   },
   col_name: {
     type: DataTypes.STRING(250),
@@ -47,11 +52,11 @@ export const Campaign = db.define<Model<CampaignAttributes, CampaignCreationAttr
     defaultValue: false,
   },
   dynamic_fields: {
-    type: DataTypes.JSON,  
+    type: DataTypes.JSON,
     allowNull: true,
   }
 }, {
-  tableName: "campaigns", 
+  tableName: "campaigns",
   timestamps: true,
 });
 

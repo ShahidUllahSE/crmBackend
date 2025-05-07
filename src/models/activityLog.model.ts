@@ -16,6 +16,7 @@ export const ActivityLog = db.define<Model<ActivityLogAttributes>>("ActivityLog"
     autoIncrement: true,
     primaryKey: true,
   },
+  
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,

@@ -1,12 +1,15 @@
+// services/user.service.ts
 import User from "../models/user.model";
 import bcrypt from "bcrypt";
 import { UserAttributes } from "../interfaces/user.interface";
 import jwt from "jsonwebtoken";  // Make sure you have the `jsonwebtoken` package installed
+import { logActivity } from "./activity.service";  // Import activity service
+import { sendNotification } from "./notification.service";  // Import notification service
 
 export const createUser = async (userData: Partial<UserAttributes>): Promise<UserAttributes> => {
     const { email, password, userrole } = userData;
   
-    if (!email || !password || !userrole) {  // ✅ Ensure userrole is provided
+    if (!email || !password || !userrole) {  // Ensure userrole is provided
       throw new Error("Email, password, and user role are required!");
     }
   
@@ -20,70 +23,94 @@ export const createUser = async (userData: Partial<UserAttributes>): Promise<Use
     const salt = await bcrypt.genSalt(10);
     userData.password = await bcrypt.hash(password, salt);
   
-    // ✅ Explicitly set userrole to ensure it's not undefined
+    // Ensure userrole is always defined
     const newUserData: UserAttributes = {
       ...userData,
-      userrole: userrole, // ✅ Ensuring it's always defined
+      userrole: userrole,
       block: false,
-      token: userData.token || "",  // ✅ Assign default if token is missing
+      token: userData.token || "",  // Assign default if token is missing
       created_at: new Date(),
       updated_at: new Date(),
     };
   
     const user = await User.create(newUserData);
+
+    if (!user.id) {
+      throw new Error("User ID not found after creation");
+    }
+
+    // Log the user registration activity
+    await logActivity(user.id, "Registration", "User registered successfully");
+
+    // Send a notification to the user about the successful registration
+    await sendNotification(user.id, "Welcome! Your account has been successfully created.");
+
     return user;
-  };
-  
+};
 
 
-  export const loginUser = async (userData: { email: string, password: string }): Promise<any> => {
-    console.log("User Data received:", userData);  
-  
-    const { email, password } = userData;
-  
-    if (!password) {
-      throw new Error("Password is required!");
-    }
-    if (!email) {
-      throw new Error("Email is required!");
-    }
-  
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
-      throw new Error("User not found!");
-    }
-  
-    if (!user.password) {
-      throw new Error("User password is missing!");
-    }
-  
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new Error("Invalid credentials!");
-    }
-  
-    // ✅ Include userrole in the token
-    const token = jwt.sign(
-      { id: user.id, email: user.email, userrole: user.userrole },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
-    );
-  
-    // ✅ Ensure userrole is returned in the response
-    return {
-      user: {
-        id: user.id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        userrole: user.userrole, // ✅ Role returned to frontend
-        block: user.block,
-        last_login: user.last_login,
-      },
-      token,
-    };
+
+// services/user.service.ts
+export const loginUser = async (userData: { email: string, password: string }): Promise<any> => {
+  const { email, password } = userData;
+
+  console.log("User Data received:", userData);
+
+  if (!password) {
+    throw new Error("Password is required!");
+  }
+  if (!email) {
+    throw new Error("Email is required!");
+  }
+
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    throw new Error("User not found!");
+  }
+
+  if (!user.password) {
+    throw new Error("User password is missing!");
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new Error("Invalid credentials!");
+  }
+
+  // ✅ Include userrole in the token
+  const token = jwt.sign(
+    { id: user.id, email: user.email, userrole: user.userrole },
+    process.env.JWT_SECRET as string,
+    { expiresIn: "1h" }
+  );
+
+  // ✅ Log the login activity only if user.id is not undefined
+  if (user.id) {
+    await logActivity(user.id, "Login", "User logged in successfully");
+  } else {
+    throw new Error("User ID is missing!");
+  }
+
+  // ✅ Send a notification to the user on successful login
+  if (user.id) {
+    await sendNotification(user.id, "You have successfully logged in!");
+  }
+
+  // ✅ Ensure userrole is returned in the response
+  return {
+    user: {
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      userrole: user.userrole, // Role returned to frontend
+      block: user.block,
+      last_login: user.last_login,
+    },
+    token,
   };
-  
+};
+
   
   
   export const getAllUsers = async (): Promise<UserAttributes[]> => {
