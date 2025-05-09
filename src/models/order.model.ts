@@ -1,10 +1,10 @@
-import { DataTypes, Model, Optional, Sequelize } from "sequelize";
+import { DataTypes, Model, Optional } from "sequelize";
 import db from "../../db";  // Ensure your Sequelize instance is imported correctly
 
 // Define the attributes for the Order model
 export interface OrderAttributes {
   id: number;
-  agent_id: number;
+  agent: string;
   campaign_id: number;
   state: string;
   priority_level: "High" | "Medium" | "Low" | "Gold Agent";
@@ -15,6 +15,14 @@ export interface OrderAttributes {
   area_to_use?: string;
   order_datetime: Date;
   created_by: number;
+  assign_to_client?: {
+    id: number;
+    name: string;
+  };
+  assign_to_vendor?: {
+    id: number;
+    name: string;
+  };
   created_at: Date;
   updated_at: Date;
 }
@@ -23,7 +31,6 @@ export interface OrderAttributes {
 export interface OrderCreationAttributes extends Optional<OrderAttributes, "id" | "created_at" | "updated_at"> {}
 
 const initOrderModel = () => {
-  // Define the Order model using Sequelize's Model.init() in a functional style
   return db.define<Model<OrderAttributes, OrderCreationAttributes>>(
     "Order",
     {
@@ -32,8 +39,8 @@ const initOrderModel = () => {
         autoIncrement: true,
         primaryKey: true,
       },
-      agent_id: {
-        type: DataTypes.INTEGER,
+      agent: {
+        type: DataTypes.STRING,
         allowNull: false,
       },
       campaign_id: {
@@ -76,6 +83,16 @@ const initOrderModel = () => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      assign_to_client: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        comment: "Contains { id: number, name: string } for the client",
+      },
+      assign_to_vendor: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        comment: "Contains { id: number, name: string } for the vendor",
+      },
       created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
@@ -92,6 +109,6 @@ const initOrderModel = () => {
   );
 };
 
-const Order = initOrderModel(); // Initialize the model with the Sequelize instance
+const Order = initOrderModel();
 
 export default Order;

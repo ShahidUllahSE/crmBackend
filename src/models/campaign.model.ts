@@ -3,14 +3,14 @@ import db from "../../db";
 
 export interface CampaignAttributes {
   id: number;
-  campaignName: string; // ✅ Added
+  campaignName: string;
   col_name: string;
   col_slug: string;
   col_type: "text" | "number" | "date" | "dropdown" | "radio" | "checkbox";
   default_value?: string;
   options?: string[];
   multiple?: boolean;
-  dynamic_fields?: any;
+  dynamic_fields?: any; // not needed for required fields, used for optional/dynamic ones
 }
 
 export interface CampaignCreationAttributes extends Optional<CampaignAttributes, "id"> {}
@@ -21,7 +21,7 @@ export const Campaign = db.define<Model<CampaignAttributes, CampaignCreationAttr
     autoIncrement: true,
     primaryKey: true,
   },
-  campaignName: { // ✅ Added
+  campaignName: {
     type: DataTypes.STRING(255),
     allowNull: false,
   },
@@ -32,7 +32,6 @@ export const Campaign = db.define<Model<CampaignAttributes, CampaignCreationAttr
   col_slug: {
     type: DataTypes.STRING(250),
     allowNull: false,
-    unique: true,
   },
   col_type: {
     type: DataTypes.ENUM("text", "number", "date", "dropdown", "radio", "checkbox"),
@@ -58,6 +57,12 @@ export const Campaign = db.define<Model<CampaignAttributes, CampaignCreationAttr
 }, {
   tableName: "campaigns",
   timestamps: true,
+  indexes: [
+    {
+      unique: false,
+      fields: ['campaignName'],
+    }
+  ]
 });
 
 export default Campaign;
