@@ -1,27 +1,45 @@
-import { DataTypes, Model } from "sequelize";
+// models/role.model.ts
+import { DataTypes, Model, Optional } from "sequelize";
 import db from "../../db";
 
 export interface RoleAttributes {
   id: number;
-  role: 'admin' | 'vendor' | 'client';
+  name: string;
+  description?: string;
 }
 
-interface RoleModel extends Model<RoleAttributes>, RoleAttributes {}
+// Optional fields for creation
+interface RoleCreationAttributes extends Optional<RoleAttributes, "id"> {}
 
-const Role = db.define<RoleModel>("Role", {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true,
+class Role extends Model<RoleAttributes, RoleCreationAttributes> implements RoleAttributes {
+  public id!: number;
+  public name!: string;
+  public description?: string;
+}
+
+Role.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true,
+    },
+    description: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
   },
-  role: {
-    type: DataTypes.ENUM('admin', 'vendor', 'client'),
-    allowNull: false,
-    unique: true,
-  },
-}, {
-  tableName: 'roles',
-  timestamps: true,
-});
+  {
+    sequelize: db,
+    tableName: "roles",
+    modelName: "Role",
+    timestamps: true,
+  }
+);
 
 export default Role;

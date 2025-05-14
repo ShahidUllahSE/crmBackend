@@ -1,20 +1,48 @@
 import { Response, NextFunction } from "express";
-import { extractUserIdFromToken } from "../utils/authHelper"; 
-import { CustomRequest } from "../types/custom"; 
+import { extractUserIdFromToken } from "../utils/authHelper";
+import { CustomRequest } from "../types/custom";
+import User from "../models/user.model";
+import Role from "../models/role.model";
+import Permission from "../models/permission.model";
 
-export const verifyToken = (req: CustomRequest, res: Response, next: NextFunction): any => { 
-  const token = req.headers.authorization?.split(" ")[1]; 
+export const verifyToken = async (req: CustomRequest, res: Response, next: NextFunction): Promise<void> => {
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return res.status(403).json({ message: "No token provided" });
+    res.status(403).json({ message: "No token provided" });
+    return;
   }
 
-  const userId = extractUserIdFromToken(token); 
+  const userId = extractUserIdFromToken(token);
 
   if (!userId) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+    res.status(401).json({ message: "Invalid or expired token" });
+    return;
   }
 
-  req.user = { id: userId };
-  next(); 
+  try {
+    const user = await User.findByPk(userId, {
+      include: {
+        model: Role,
+        include: [Permission],
+      },
+    }) as any;
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const permissions = user.Role?.Permissions?.map((p: any) => p.name) || [];
+
+    req.user = {
+      id: user.id!,
+      permissions,
+    };
+
+    next();
+  } catch (err) {
+    console.error("Token verification error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 };

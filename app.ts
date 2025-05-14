@@ -3,6 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
+import { syncPermissionsToDB } from "./src/utils/syncPermissions";
+import db from "./db"; // Sequelize instance
+import "./src/models/associations"; // 🔥 This ensures associations are defined
 
 dotenv.config();
 
@@ -15,7 +18,6 @@ app.use(cors());
 // Custom CORS Middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
   const allowedOrigin = process.env.FRONT_END_URL || "http://localhost:3001";
-
   res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Max-Age", "1800");
@@ -24,25 +26,39 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   if (req.method === "OPTIONS") {
     res.sendStatus(204);
-    return; // Ensures the function exits properly
+    return;
   }
 
   next();
 });
 
-// Function to dynamically load route
+// Load routes dynamically
 const loadRoutes = (app: Application) => {
   const routesPath = path.join(__dirname, "src/routes");
-  // console.log("routes",loadRoutes)
   fs.readdirSync(routesPath).forEach((file) => {
-    if (file.endsWith(".routes.ts")) {
+    if (file.endsWith(".routes.ts") || file.endsWith(".routes.js")) {
       const route = require(path.join(routesPath, file));
       app.use("/api", route.default);
     }
   });
 };
 
-// Load routes
-loadRoutes(app);
+// Initialize app
+const startServer = async () => {
+  try {
+    await db.sync({ alter: true }); // 🟢 Ensures all models including join tables are created
+    console.log("Database synced.");
+
+    await syncPermissionsToDB(); // ✅ Now sync permissions safely
+    console.log("Permissions synced to database.");
+
+    loadRoutes(app);
+    console.log("App initialized.");
+  } catch (err) {
+    console.error("App startup error:", err);
+    process.exit(1);
+  }
+};
+startServer();
 
 export default app;

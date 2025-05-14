@@ -1,17 +1,16 @@
+// models/user.model.ts
 import { DataTypes, Model, Optional } from "sequelize";
 import db from "../../db";
-import { UserAttributes } from "../interfaces/user.interface"; // Import the interface
+import { UserAttributes } from "../interfaces/user.interface";
+import Role from "./role.model"; // Import the Role model
 
-// Define attributes required when creating a new user (optional fields)
 interface UserCreationAttributes extends Optional<UserAttributes, "id" | "created_at" | "updated_at"> {}
 
-// Define the User model interface to include the 'created_at' and 'updated_at' fields
 interface UserModel extends Model<UserAttributes, UserCreationAttributes>, UserAttributes {
   created_at: Date;
   updated_at: Date;
 }
 
-// Define the User model using sequelize.define (functional approach)
 export const User = db.define<UserModel>("User", {
   id: {
     type: DataTypes.INTEGER,
@@ -59,20 +58,22 @@ export const User = db.define<UserModel>("User", {
     type: DataTypes.STRING(250),
     allowNull: true,
   },
-
-  // Vendor-specific fields
   vendor: {
     type: DataTypes.STRING(300),
     allowNull: true,
   },
-
-  // Role-based user type
   userrole: {
     type: DataTypes.ENUM("admin", "vendor", "client"),
     allowNull: true,
   },
-
-  // SMTP Configuration Fields
+  roleId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: "roles",
+      key: "id",
+    },
+  },
   smtpemail: {
     type: DataTypes.STRING(300),
     allowNull: true,
@@ -93,8 +94,6 @@ export const User = db.define<UserModel>("User", {
     type: DataTypes.STRING(300),
     allowNull: true,
   },
-
-  // Branch Details
   branchname: {
     type: DataTypes.STRING(300),
     allowNull: true,
@@ -139,8 +138,6 @@ export const User = db.define<UserModel>("User", {
     type: DataTypes.STRING(250),
     allowNull: true,
   },
-
-  // User Status & Tracking
   block: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
@@ -157,29 +154,30 @@ export const User = db.define<UserModel>("User", {
     type: DataTypes.TEXT,
     allowNull: true,
   },
-
-  // Timestamp fields
   created_at: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
   updated_at: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW, // Can't use onUpdate in init, handled manually
+    defaultValue: DataTypes.NOW,
   },
 }, {
   tableName: "users",
-  timestamps: true, // Manually handling created_at & updated_at
+  timestamps: true,
+  createdAt: "created_at",
+  updatedAt: "updated_at",
 });
 
-// Hook to update 'updated_at' manually
+// Hook to manually update the 'updated_at' field
 User.beforeUpdate((user) => {
   user.updated_at = new Date();
 });
 
+// Establish relationship
+User.belongsTo(Role, { foreignKey: "roleId", as: "role" });
+
 export default User;
-
-
 
 
 // User Model with proper role typing
