@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../../db";
 
-class RolePermission extends Model {
+export class RolePermission extends Model {
   public roleId!: number;
   public permissionId!: number;
 }
