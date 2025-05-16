@@ -2,56 +2,63 @@
 import User from "../models/user.model";
 import bcrypt from "bcrypt";
 import { UserAttributes } from "../interfaces/user.interface";
-import jwt from "jsonwebtoken";  // Make sure you have the `jsonwebtoken` package installed
-import { logActivity } from "./activity.service";  // Import activity service
-import { sendNotification } from "./notification.service";  // Import notification service
+import jwt from "jsonwebtoken"; // Make sure you have the `jsonwebtoken` package installed
+import { logActivity } from "./activity.service"; // Import activity service
+import { sendNotification } from "./notification.service"; // Import notification service
 
-export const createUser = async (userData: Partial<UserAttributes>): Promise<UserAttributes> => {
-    const { email, password, userrole } = userData;
-  
-    if (!email || !password || !userrole) {  // Ensure userrole is provided
-      throw new Error("Email, password, and user role are required!");
-    }
-  
-    // Check if user already exists
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      throw new Error("Email already in use!");
-    }
-  
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    userData.password = await bcrypt.hash(password, salt);
-  
-    // Ensure userrole is always defined
-    const newUserData: UserAttributes = {
-      ...userData,
-      userrole: userrole,
-      block: false,
-      token: userData.token || "",  // Assign default if token is missing
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-  
-    const user = await User.create(newUserData);
+export const createUser = async (
+  userData: Partial<UserAttributes>
+): Promise<UserAttributes> => {
+  const { email, password, roleId } = userData;
 
-    if (!user.id) {
-      throw new Error("User ID not found after creation");
-    }
+  if (!email || !password || !roleId) {
+    // Ensure userrole is provided
+    throw new Error("Email, password, and user role are required!");
+  }
 
-    // Log the user registration activity
-    await logActivity(user.id, "Registration", "User registered successfully");
+  // Check if user already exists
+  const existingUser = await User.findOne({ where: { email } });
+  if (existingUser) {
+    throw new Error("Email already in use!");
+  }
 
-    // Send a notification to the user about the successful registration
-    await sendNotification(user.id, "Welcome! Your account has been successfully created.");
+  // Hash password
+  const salt = await bcrypt.genSalt(10);
+  userData.password = await bcrypt.hash(password, salt);
 
-    return user;
+  // Ensure userrole is always defined
+  const newUserData: UserAttributes = {
+    ...userData,
+    roleId: roleId,
+    block: false,
+    token: userData.token || "", // Assign default if token is missing
+    created_at: new Date(),
+    updated_at: new Date(),
+  };
+
+  const user = await User.create(newUserData);
+
+  if (!user.id) {
+    throw new Error("User ID not found after creation");
+  }
+
+  // Log the user registration activity
+  await logActivity(user.id, "Registration", "User registered successfully");
+
+  // Send a notification to the user about the successful registration
+  await sendNotification(
+    user.id,
+    "Welcome! Your account has been successfully created."
+  );
+
+  return user;
 };
 
-
-
 // services/user.service.ts
-export const loginUser = async (userData: { email: string, password: string }): Promise<any> => {
+export const loginUser = async (userData: {
+  email: string;
+  password: string;
+}): Promise<any> => {
   const { email, password } = userData;
 
   console.log("User Data received:", userData);
@@ -111,35 +118,35 @@ export const loginUser = async (userData: { email: string, password: string }): 
   };
 };
 
-  
-  
-  export const getAllUsers = async (): Promise<UserAttributes[]> => {
-    try {
-      const users = await User.findAll();
-      return users;
-    } catch (error) {
-      throw new Error("Error fetching users: " + (error as Error).message);
-    }
-  };
+export const getAllUsers = async (): Promise<UserAttributes[]> => {
+  try {
+    const users = await User.findAll();
+    return users;
+  } catch (error) {
+    throw new Error("Error fetching users: " + (error as Error).message);
+  }
+};
 
-  export const getUserById = async (userId: number): Promise<UserAttributes | null> => {
-    try {
-      const user = await User.findByPk(userId); // Fetch user by primary key (ID)
-      return user;
-    } catch (error) {
-      throw new Error("Error fetching user: " + (error as Error).message);
-    }
-  };
-
-
-
+export const getUserById = async (
+  userId: number
+): Promise<UserAttributes | null> => {
+  try {
+    const user = await User.findByPk(userId); // Fetch user by primary key (ID)
+    return user;
+  } catch (error) {
+    throw new Error("Error fetching user: " + (error as Error).message);
+  }
+};
 
 // Update user by ID
-export const updateUser = async (userId: string, updatedData: Partial<UserAttributes>): Promise<any> => {
+export const updateUser = async (
+  userId: string,
+  updatedData: Partial<UserAttributes>
+): Promise<any> => {
   try {
     // Find the user by primary key (ID)
     const user = await User.findByPk(userId);
-    
+
     if (!user) {
       throw new Error("User not found!");
     }
@@ -147,20 +154,18 @@ export const updateUser = async (userId: string, updatedData: Partial<UserAttrib
     // Update the user with the provided data
     await user.update(updatedData);
 
-    return user;  // Return the updated user
-  } catch (error:any) {
+    return user; // Return the updated user
+  } catch (error: any) {
     throw new Error(error.message);
   }
 };
-
-
 
 // Delete user by ID
 export const deleteUser = async (userId: string): Promise<string> => {
   try {
     // Find the user by primary key (ID)
     const user = await User.findByPk(userId);
-    
+
     if (!user) {
       throw new Error("User not found!");
     }
@@ -169,14 +174,10 @@ export const deleteUser = async (userId: string): Promise<string> => {
     await user.destroy();
 
     return "User deleted successfully!";
-  } catch (error:any) {
+  } catch (error: any) {
     throw new Error(error.message);
   }
 };
-
-
-
-
 
 // import bcrypt from "bcrypt";
 // import jwt from "jsonwebtoken";
@@ -267,7 +268,6 @@ export const deleteUser = async (userId: string): Promise<string> => {
 //   };
 // };
 
-
 // // Fetch all users with related role data
 // export const getAllUsers = async (): Promise<any[]> => {
 //   const users = await User.findAll({
@@ -277,7 +277,7 @@ export const deleteUser = async (userId: string): Promise<string> => {
 //       { model: Role, as: "role", required: true }, // Always include role data
 //     ],
 //   });
-  
+
 //   return users.map(user => ({
 //     id: user.id,
 //     firstname: user.firstname,
@@ -297,7 +297,7 @@ export const deleteUser = async (userId: string): Promise<string> => {
 //       { model: Client, as: "client", required: false },
 //     ],
 //   });
-  
+
 //   if (!user) throw new Error("User not found!");
 
 //   // Update user
@@ -307,7 +307,7 @@ export const deleteUser = async (userId: string): Promise<string> => {
 //   if (user.roleId) {
 //     const role = await Role.findByPk(user.roleId);
 //     if (!role) throw new Error("Role not found!");
-    
+
 //     // Update role-specific data for Vendor or Client
 //     if (role.role === "vendor") {  // Role comparison now with lowercase string
 //       const vendor = await Vendor.findOne({ where: { userId: user.id } });
