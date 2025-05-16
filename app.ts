@@ -32,13 +32,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Load routes dynamically
+// Load routes dynamically (support .js and .ts files)
 const loadRoutes = (app: Application) => {
   const routesPath = path.join(__dirname, "src/routes");
   fs.readdirSync(routesPath).forEach((file) => {
-    if (file.endsWith(".routes.ts") || file.endsWith(".routes.js")) {
-      const route = require(path.join(routesPath, file));
-      app.use("/api", route.default);
+    if (file.endsWith(".routes.js") || file.endsWith(".routes.ts")) {
+      const routeModule = require(path.join(routesPath, file));
+      const router = routeModule.default;
+
+      if (router && typeof router === "function") {
+        app.use("/api", router);
+      } else {
+        console.warn(`⚠️  Skipping ${file} — No valid default export found.`);
+      }
     }
   });
 };
@@ -59,6 +65,7 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
 startServer();
 
 export default app;

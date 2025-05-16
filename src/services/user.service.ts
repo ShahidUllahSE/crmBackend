@@ -1,10 +1,9 @@
-// services/user.service.ts
 import User from "../models/user.model";
 import bcrypt from "bcrypt";
 import { UserAttributes } from "../interfaces/user.interface";
-import jwt from "jsonwebtoken"; // Make sure you have the `jsonwebtoken` package installed
-import { logActivity } from "./activity.service"; // Import activity service
-import { sendNotification } from "./notification.service"; // Import notification service
+import jwt from "jsonwebtoken";
+import { logActivity } from "./activity.service";
+import { sendNotification } from "./notification.service";
 
 export const createUser = async (
   userData: Partial<UserAttributes>
@@ -12,26 +11,22 @@ export const createUser = async (
   const { email, password, roleId } = userData;
 
   if (!email || !password || !roleId) {
-    // Ensure userrole is provided
-    throw new Error("Email, password, and user role are required!");
+    throw new Error("Email, password, and roleId are required!");
   }
 
-  // Check if user already exists
   const existingUser = await User.findOne({ where: { email } });
   if (existingUser) {
     throw new Error("Email already in use!");
   }
 
-  // Hash password
   const salt = await bcrypt.genSalt(10);
   userData.password = await bcrypt.hash(password, salt);
 
-  // Ensure userrole is always defined
-  const newUserData: UserAttributes = {
+  const newUserData: Partial<UserAttributes> = {
     ...userData,
-    roleId: roleId,
+    roleId,
     block: false,
-    token: userData.token || "", // Assign default if token is missing
+    token: userData.token || "",
     created_at: new Date(),
     updated_at: new Date(),
   };
@@ -42,41 +37,25 @@ export const createUser = async (
     throw new Error("User ID not found after creation");
   }
 
-  // Log the user registration activity
   await logActivity(user.id, "Registration", "User registered successfully");
-
-  // Send a notification to the user about the successful registration
-  await sendNotification(
-    user.id,
-    "Welcome! Your account has been successfully created."
-  );
+  await sendNotification(user.id, "Welcome! Your account has been successfully created.");
 
   return user;
 };
 
-// services/user.service.ts
 export const loginUser = async (userData: {
   email: string;
   password: string;
 }): Promise<any> => {
   const { email, password } = userData;
 
-  console.log("User Data received:", userData);
-
-  if (!password) {
-    throw new Error("Password is required!");
-  }
-  if (!email) {
-    throw new Error("Email is required!");
+  if (!email || !password) {
+    throw new Error("Email and password are required!");
   }
 
   const user = await User.findOne({ where: { email } });
-  if (!user) {
-    throw new Error("User not found!");
-  }
-
-  if (!user.password) {
-    throw new Error("User password is missing!");
+  if (!user || !user.password) {
+    throw new Error("Invalid credentials!");
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -84,33 +63,25 @@ export const loginUser = async (userData: {
     throw new Error("Invalid credentials!");
   }
 
-  // ✅ Include userrole in the token
   const token = jwt.sign(
     { id: user.id, email: user.email, userrole: user.userrole },
     process.env.JWT_SECRET as string,
     { expiresIn: "1h" }
   );
 
-  // ✅ Log the login activity only if user.id is not undefined
   if (user.id) {
     await logActivity(user.id, "Login", "User logged in successfully");
-  } else {
-    throw new Error("User ID is missing!");
-  }
-
-  // ✅ Send a notification to the user on successful login
-  if (user.id) {
     await sendNotification(user.id, "You have successfully logged in!");
   }
 
-  // ✅ Ensure userrole is returned in the response
   return {
     user: {
       id: user.id,
       firstname: user.firstname,
       lastname: user.lastname,
       email: user.email,
-      userrole: user.userrole, // Role returned to frontend
+      userrole: user.userrole,
+      roleId: user.roleId,
       block: user.block,
       last_login: user.last_login,
     },
@@ -120,7 +91,7 @@ export const loginUser = async (userData: {
 
 export const getAllUsers = async (): Promise<UserAttributes[]> => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({ include: ["role"] }); // Include role relationship
     return users;
   } catch (error) {
     throw new Error("Error fetching users: " + (error as Error).message);
@@ -131,53 +102,44 @@ export const getUserById = async (
   userId: number
 ): Promise<UserAttributes | null> => {
   try {
-    const user = await User.findByPk(userId); // Fetch user by primary key (ID)
+    const user = await User.findByPk(userId, { include: ["role"] }); // Include role relationship
     return user;
   } catch (error) {
     throw new Error("Error fetching user: " + (error as Error).message);
   }
 };
 
-// Update user by ID
 export const updateUser = async (
   userId: string,
   updatedData: Partial<UserAttributes>
 ): Promise<any> => {
   try {
-    // Find the user by primary key (ID)
     const user = await User.findByPk(userId);
-
     if (!user) {
       throw new Error("User not found!");
     }
 
-    // Update the user with the provided data
     await user.update(updatedData);
-
-    return user; // Return the updated user
+    return user;
   } catch (error: any) {
     throw new Error(error.message);
   }
 };
 
-// Delete user by ID
 export const deleteUser = async (userId: string): Promise<string> => {
   try {
-    // Find the user by primary key (ID)
     const user = await User.findByPk(userId);
-
     if (!user) {
       throw new Error("User not found!");
     }
 
-    // Delete the user
     await user.destroy();
-
     return "User deleted successfully!";
   } catch (error: any) {
     throw new Error(error.message);
   }
 };
+
 
 // import bcrypt from "bcrypt";
 // import jwt from "jsonwebtoken";
