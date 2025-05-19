@@ -4,8 +4,8 @@ import { UserAttributes } from "../interfaces/user.interface";
 import jwt from "jsonwebtoken";
 import { logActivity } from "./activity.service";
 import { sendNotification } from "./notification.service";
-import { Role } from "../models/role.model";
-import { Permission } from "../models/permission.model";
+import Role from "../models/role.model";
+import Permission from "../models/permission.model";
 
 export const createUser = async (
   userData: Partial<UserAttributes>
@@ -41,15 +41,16 @@ export const createUser = async (
   await logActivity(user.id, "Registration", "User registered successfully");
   await sendNotification(user.id, "Welcome! Your account has been successfully created.");
 
+  // Include Role with alias and its Permissions with alias
   const userWithRole = await User.findByPk(user.id, {
     include: [
       {
         model: Role,
-        as: "role",
+        as: "role", // Must use alias 'role' here
         include: [
           {
             model: Permission,
-            as: "permissions", // ✅ Required alias
+            as: "permissions", // Must use alias 'permissions' here
             through: { attributes: [] },
           },
         ],
@@ -91,11 +92,11 @@ export const loginUser = async (userData: {
     include: [
       {
         model: Role,
-        as: "role",
+        as: "role", // Alias 'role' here
         include: [
           {
             model: Permission,
-            as: "permissions", // ✅ Required alias
+            as: "permissions", // Alias 'permissions' here
             through: { attributes: [] },
           },
         ],
@@ -145,7 +146,14 @@ export const getAllUsers = async (): Promise<UserAttributes[]> => {
       include: [
         {
           model: Role,
-          as: "role",
+          as: "role", // Alias 'role' here
+          include: [
+            {
+              model: Permission,
+              as: "permissions", // Alias 'permissions' here
+              through: { attributes: [] },
+            },
+          ],
         },
       ],
     });
@@ -163,7 +171,14 @@ export const getUserById = async (
       include: [
         {
           model: Role,
-          as: "role",
+          as: "role", // Alias 'role' here
+          include: [
+            {
+              model: Permission,
+              as: "permissions", // Alias 'permissions' here
+              through: { attributes: [] },
+            },
+          ],
         },
       ],
     });
