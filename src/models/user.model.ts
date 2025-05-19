@@ -6,9 +6,11 @@ import Role from "./role.model"; // Import the Role model
 
 interface UserCreationAttributes extends Optional<UserAttributes, "id" | "created_at" | "updated_at"> {}
 
+// ✅ Extend Model and include the optional role association
 interface UserModel extends Model<UserAttributes, UserCreationAttributes>, UserAttributes {
   created_at: Date;
   updated_at: Date;
+  role?: typeof Role; // Optional role association
 }
 
 export const User = db.define<UserModel>("User", {
@@ -169,12 +171,12 @@ export const User = db.define<UserModel>("User", {
   updatedAt: "updated_at",
 });
 
-// Hook to manually update the 'updated_at' field
+// ✅ Update `updated_at` on update
 User.beforeUpdate((user) => {
   user.updated_at = new Date();
 });
 
-// Establish relationship
+// ✅ Define association
 User.belongsTo(Role, { foreignKey: "roleId", as: "role" });
 
 export default User;

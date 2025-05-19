@@ -4,10 +4,12 @@ import { UserAttributes } from "../interfaces/user.interface";
 import jwt from "jsonwebtoken";
 import { logActivity } from "./activity.service";
 import { sendNotification } from "./notification.service";
+import { Role } from "../models/role.model"; // Adjust the path based on your folder structure
+
 
 export const createUser = async (
   userData: Partial<UserAttributes>
-): Promise<UserAttributes> => {
+): Promise<any> => {
   const { email, password, roleId } = userData;
 
   if (!email || !password || !roleId) {
@@ -24,7 +26,6 @@ export const createUser = async (
 
   const newUserData: Partial<UserAttributes> = {
     ...userData,
-    roleId,
     block: false,
     token: userData.token || "",
     created_at: new Date(),
@@ -40,7 +41,28 @@ export const createUser = async (
   await logActivity(user.id, "Registration", "User registered successfully");
   await sendNotification(user.id, "Welcome! Your account has been successfully created.");
 
-  return user;
+  // ✅ Include associated role data
+  const userWithRole = await User.findByPk(user.id, {
+    include: [{ model: Role, as: "role" }],
+  });
+
+  if (!userWithRole) {
+    throw new Error("Failed to fetch created user with role");
+  }
+
+  return {
+    user: {
+      id: userWithRole.id,
+      firstname: userWithRole.firstname,
+      lastname: userWithRole.lastname,
+      email: userWithRole.email,
+      userrole: userWithRole.userrole,
+      roleId: userWithRole.roleId,
+      role: userWithRole.role, // Full role object
+      block: userWithRole.block,
+      last_login: userWithRole.last_login,
+    },
+  };
 };
 
 export const loginUser = async (userData: {
@@ -53,7 +75,11 @@ export const loginUser = async (userData: {
     throw new Error("Email and password are required!");
   }
 
-  const user = await User.findOne({ where: { email } });
+  const user = await User.findOne({
+    where: { email },
+    include: [{ model: Role, as: "role" }],
+  });
+
   if (!user || !user.password) {
     throw new Error("Invalid credentials!");
   }
@@ -82,12 +108,15 @@ export const loginUser = async (userData: {
       email: user.email,
       userrole: user.userrole,
       roleId: user.roleId,
+      role: user.role, // Full role object
       block: user.block,
       last_login: user.last_login,
     },
     token,
   };
 };
+
+
 
 export const getAllUsers = async (): Promise<UserAttributes[]> => {
   try {
