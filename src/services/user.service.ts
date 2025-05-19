@@ -49,6 +49,7 @@ export const createUser = async (
         include: [
           {
             model: Permission,
+            as: "permissions", // ✅ Required alias
             through: { attributes: [] },
           },
         ],
@@ -94,6 +95,7 @@ export const loginUser = async (userData: {
         include: [
           {
             model: Permission,
+            as: "permissions", // ✅ Required alias
             through: { attributes: [] },
           },
         ],
