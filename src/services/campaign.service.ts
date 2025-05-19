@@ -52,27 +52,73 @@ export const getCampaignById = async (
 };
 
 // ✅ Update a specific field by ID
+// export const updateCampaign = async (
+//   id: number,
+//   data: CampaignCreationAttributes
+// ): Promise<CampaignAttributes | null> => {
+//   try {
+//     const campaign = await Campaign.findByPk(id);
+//     if (!campaign) {
+//       throw new Error("Campaign field not found");
+//     }
+
+//     await campaign.update({
+//       col_name: data.col_name,
+//       col_slug: data.col_slug,
+//       col_type: data.col_type,
+//       default_value: data.default_value,
+//       options: data.options,
+//       multiple: data.multiple,
+//       dynamic_fields: data.dynamic_fields,
+//     });
+
+//     return campaign.get();
+//   } catch (error: any) {
+//     throw new Error(`Error updating campaign: ${error.message}`);
+//   }
+// };
+
 export const updateCampaign = async (
   id: number,
-  data: CampaignCreationAttributes
-): Promise<CampaignAttributes | null> => {
+  data: { campaignName: string; fields: any[] }
+): Promise<any> => {
   try {
-    const campaign = await Campaign.findByPk(id);
-    if (!campaign) {
-      throw new Error("Campaign field not found");
-    }
+    const { campaignName, fields } = data;
 
-    await campaign.update({
-      col_name: data.col_name,
-      col_slug: data.col_slug,
-      col_type: data.col_type,
-      default_value: data.default_value,
-      options: data.options,
-      multiple: data.multiple,
-      dynamic_fields: data.dynamic_fields,
+    // Find existing campaign fields by campaignName (since id refers to a single field)
+    const existingFields = await Campaign.findAll({
+      where: { campaignName },
     });
 
-    return campaign.get();
+    if (!existingFields.length) {
+      throw new Error("Campaign not found");
+    }
+
+    // Delete existing fields for this campaign
+    await Campaign.destroy({
+      where: { campaignName },
+    });
+
+    // Create new fields
+    const newFields = await Promise.all(
+      fields.map(async (field) => {
+        return await Campaign.create({
+          campaignName,
+          col_name: field.col_name,
+          col_slug: field.col_slug,
+          col_type: field.col_type,
+          default_value: field.default_value,
+          options: field.options,
+          multiple: field.multiple,
+          dynamic_fields: field.dynamic_fields,
+        });
+      })
+    );
+
+    return {
+      campaignName,
+      fields: newFields.map((field) => field.get()),
+    };
   } catch (error: any) {
     throw new Error(`Error updating campaign: ${error.message}`);
   }
