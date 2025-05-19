@@ -4,8 +4,8 @@ import { UserAttributes } from "../interfaces/user.interface";
 import jwt from "jsonwebtoken";
 import { logActivity } from "./activity.service";
 import { sendNotification } from "./notification.service";
-import { Role } from "../models/role.model"; // Adjust the path based on your folder structure
-
+import { Role } from "../models/role.model";
+import { Permission } from "../models/permission.model";
 
 export const createUser = async (
   userData: Partial<UserAttributes>
@@ -41,9 +41,21 @@ export const createUser = async (
   await logActivity(user.id, "Registration", "User registered successfully");
   await sendNotification(user.id, "Welcome! Your account has been successfully created.");
 
-  // ✅ Include associated role data
+  // ✅ Include associated role and permissions
   const userWithRole = await User.findByPk(user.id, {
-    include: [{ model: Role, as: "role" }],
+    include: [
+      {
+        model: Role,
+        as: "role",
+        include: [
+          {
+            model: Permission,
+            as: "permissions",
+            through: { attributes: [] },
+          },
+        ],
+      },
+    ],
   });
 
   if (!userWithRole) {
@@ -58,12 +70,13 @@ export const createUser = async (
       email: userWithRole.email,
       userrole: userWithRole.userrole,
       roleId: userWithRole.roleId,
-      role: userWithRole.role, // Full role object
+      role: userWithRole.role,
       block: userWithRole.block,
       last_login: userWithRole.last_login,
     },
   };
 };
+
 
 export const loginUser = async (userData: {
   email: string;
@@ -77,7 +90,19 @@ export const loginUser = async (userData: {
 
   const user = await User.findOne({
     where: { email },
-    include: [{ model: Role, as: "role" }],
+    include: [
+      {
+        model: Role,
+        as: "role",
+        include: [
+          {
+            model: Permission,
+            as: "permissions",
+            through: { attributes: [] },
+          },
+        ],
+      },
+    ],
   });
 
   if (!user || !user.password) {
@@ -108,13 +133,14 @@ export const loginUser = async (userData: {
       email: user.email,
       userrole: user.userrole,
       roleId: user.roleId,
-      role: user.role, // Full role object
+      role: user.role,
       block: user.block,
       last_login: user.last_login,
     },
     token,
   };
 };
+
 
 
 
