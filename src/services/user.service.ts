@@ -41,7 +41,6 @@ export const createUser = async (
   await logActivity(user.id, "Registration", "User registered successfully");
   await sendNotification(user.id, "Welcome! Your account has been successfully created.");
 
-  // ✅ Include associated role and permissions
   const userWithRole = await User.findByPk(user.id, {
     include: [
       {
@@ -50,7 +49,6 @@ export const createUser = async (
         include: [
           {
             model: Permission,
-            as: "permissions",
             through: { attributes: [] },
           },
         ],
@@ -77,7 +75,6 @@ export const createUser = async (
   };
 };
 
-
 export const loginUser = async (userData: {
   email: string;
   password: string;
@@ -97,7 +94,6 @@ export const loginUser = async (userData: {
         include: [
           {
             model: Permission,
-            as: "permissions",
             through: { attributes: [] },
           },
         ],
@@ -141,12 +137,16 @@ export const loginUser = async (userData: {
   };
 };
 
-
-
-
 export const getAllUsers = async (): Promise<UserAttributes[]> => {
   try {
-    const users = await User.findAll({ include: ["role"] }); // Include role relationship
+    const users = await User.findAll({
+      include: [
+        {
+          model: Role,
+          as: "role",
+        },
+      ],
+    });
     return users;
   } catch (error) {
     throw new Error("Error fetching users: " + (error as Error).message);
@@ -157,7 +157,14 @@ export const getUserById = async (
   userId: number
 ): Promise<UserAttributes | null> => {
   try {
-    const user = await User.findByPk(userId, { include: ["role"] }); // Include role relationship
+    const user = await User.findByPk(userId, {
+      include: [
+        {
+          model: Role,
+          as: "role",
+        },
+      ],
+    });
     return user;
   } catch (error) {
     throw new Error("Error fetching user: " + (error as Error).message);
