@@ -140,23 +140,24 @@ export const loginUser = async (userData: {
   };
 };
 
-export const getAllUsers = async (): Promise<UserAttributes[]> => {
+export const getAllUsers = async (): Promise<any[]> => {
   try {
     const users = await User.findAll({
       include: [
         {
           model: Role,
-          as: "role", // Alias 'role' here
+          as: "role", // Alias defined in User.belongsTo(Role, { as: 'role' })
           include: [
             {
               model: Permission,
-              as: "permissions", // Alias 'permissions' here
-              through: { attributes: [] },
+              as: "permissions", // Alias defined in Role.belongsToMany(Permission, { as: 'permissions' })
+              through: { attributes: [] }, // Hide junction table
             },
           ],
         },
       ],
     });
+
     return users;
   } catch (error) {
     throw new Error("Error fetching users: " + (error as Error).message);

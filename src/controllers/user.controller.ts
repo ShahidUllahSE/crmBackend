@@ -58,7 +58,10 @@ export const getUsers = async (req: Request, res: Response): Promise<any> => {
     });
   } catch (error) {
     console.error("Error fetching users:", error);
-    return res.status(500).json({ message: "Internal Server Error", error: (error as Error).message });
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: (error as Error).message,
+    });
   }
 };
 
