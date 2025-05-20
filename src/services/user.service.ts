@@ -70,7 +70,7 @@ export const createUser = async (
       email: userWithRole.email,
       userrole: userWithRole.userrole,
       roleId: userWithRole.roleId,
-      role: userWithRole.role,
+      role: userWithRole.role, // Full role object
       block: userWithRole.block,
       last_login: userWithRole.last_login,
     },
@@ -132,7 +132,7 @@ export const loginUser = async (userData: {
       email: user.email,
       userrole: user.userrole,
       roleId: user.roleId,
-      role: user.role,
+      role: user.role, // Full role object
       block: user.block,
       last_login: user.last_login,
     },
