@@ -177,7 +177,7 @@ User.beforeUpdate((user) => {
 });
 
 // ✅ Define association
-// User.belongsTo(Role, { foreignKey: "roleId", as: "role" });
+User.belongsTo(Role, { foreignKey: "roleId", as: "role" });
 
 export default User;
 
