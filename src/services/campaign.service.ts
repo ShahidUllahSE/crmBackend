@@ -11,11 +11,20 @@ export const createCampaign = async (
     if (!data || data.length === 0) {
       throw new Error("No campaign data provided.");
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
     const campaignName = data[0].campaignName;
     if (!campaignName) {
       throw new Error("Campaign name is missing.");
     }
+<<<<<<< HEAD
     // :x: Don't add required fields again, assuming they are sent from frontend
+=======
+
+    // ❌ Don't add required fields again, assuming they are sent from frontend
+>>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
     const created = await Campaign.bulkCreate(data);
     return created.map((c) => c.get());
   } catch (error: any) {
@@ -83,27 +92,23 @@ export const updateCampaign = async (
   data: { campaignName: string; fields: any[] }
 ): Promise<any> => {
   try {
-    const { campaignName, fields } = data;
+    // 1. Get existing campaign by ID
+    const existingCampaign = await Campaign.findOne({ where: { id } });
 
-    // Find existing campaign fields by campaignName (since id refers to a single field)
-    const existingFields = await Campaign.findAll({
-      where: { campaignName },
-    });
-
-    if (!existingFields.length) {
+    if (!existingCampaign) {
       throw new Error("Campaign not found");
     }
 
-    // Delete existing fields for this campaign
+    // 2. Delete all existing fields under old campaign name
     await Campaign.destroy({
-      where: { campaignName },
+      where: { campaignName: existingCampaign.campaignName },
     });
 
-    // Create new fields
+    // 3. Create new fields under the NEW campaign name
     const newFields = await Promise.all(
-      fields.map(async (field) => {
+      data.fields.map(async (field) => {
         return await Campaign.create({
-          campaignName,
+          campaignName: data.campaignName, // ✅ Use updated name here
           col_name: field.col_name,
           col_slug: field.col_slug,
           col_type: field.col_type,
@@ -116,7 +121,7 @@ export const updateCampaign = async (
     );
 
     return {
-      campaignName,
+      campaignName: data.campaignName,
       fields: newFields.map((field) => field.get()),
     };
   } catch (error: any) {
@@ -125,16 +130,40 @@ export const updateCampaign = async (
 };
 
 // ✅ Delete a specific field by ID
+// export const deleteCampaign = async (id: number): Promise<boolean> => {
+//   try {
+//     const campaign = await Campaign.findByPk(id);
+//     if (!campaign) {
+//       throw new Error("Campaign field not found");
+//     }
+//     await campaign.destroy();
+//     return true;
+//   } catch (error: any) {
+//     throw new Error(`Error deleting campaign: ${error.message}`);
+//   }
+// };
+
 export const deleteCampaign = async (id: number): Promise<boolean> => {
   try {
     const campaign = await Campaign.findByPk(id);
+
     if (!campaign) {
       throw new Error("Campaign field not found");
     }
+<<<<<<< HEAD
     const campaignName = campaign.get("campaignName"); // safer and avoids TS error
     await Campaign.destroy({
       where: { campaignName },
     });
+=======
+
+    const campaignName = campaign.get("campaignName"); // safer and avoids TS error
+
+    await Campaign.destroy({
+      where: { campaignName },
+    });
+
+>>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
     return true;
   } catch (error: any) {
     throw new Error(`Error deleting campaign: ${error.message}`);

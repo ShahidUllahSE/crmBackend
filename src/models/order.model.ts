@@ -122,9 +122,9 @@ export interface OrderAttributes {
   agent: string;
   campaign_id: number;
   state: string;
-  priority_level: "High" | "Medium" | "Low" | "Gold Agent";
+  priority_level: "High" | "Medium" | "Low" | "Gold Agent" | "Onhold";
   age_range: string;
-  lead_requested: boolean;
+  lead_requested: number;
   fb_link?: string;
   notes?: string;
   area_to_use?: string;
