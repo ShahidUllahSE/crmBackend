@@ -28,6 +28,8 @@ import User from "./user.model";
 import Role from "./role.model";
 import Permission from "./permission.model";
 import RolePermission from "./rolePermission.model";
+import Order from "./order.model";
+import Campaign from "./campaign.model";
 
 // Relations
 Role.belongsToMany(Permission, { through: RolePermission, foreignKey: "roleId" });
@@ -37,3 +39,14 @@ Role.hasMany(User, { foreignKey: "roleId" });
 User.belongsTo(Role, { foreignKey: "roleId" });
 
 
+// Order belongs to Campaign
+Order.belongsTo(Campaign, {
+    foreignKey: "campaign_id",
+    as: "campaign",
+  });
+  
+  // Campaign has many Orders
+  Campaign.hasMany(Order, {
+    foreignKey: "campaign_id",
+    as: "orders",
+  });

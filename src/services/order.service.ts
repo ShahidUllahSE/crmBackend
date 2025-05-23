@@ -25,7 +25,7 @@ export interface CreateOrderDTO {
 }
 
 // Function to create an order
-export const createOrder = async (
+export const createOrder = async ( 
   orderData: CreateOrderDTO,
   createdBy: number
 ): Promise<OrderAttributes> => {
@@ -58,12 +58,36 @@ export const createOrder = async (
 };
 
 // Function to get an order by ID
+// export const getOrderById = async (
+//   id: number
+// ): Promise<OrderAttributes | null> => {
+//   try {
+//     const order = await Order.findByPk(id);
+//     return order ? (order.toJSON() as OrderAttributes) : null;
+//   } catch (error: any) {
+//     throw new Error(error.message || "Failed to fetch order by ID");
+//   }
+// };
+
+
 export const getOrderById = async (
   id: number
-): Promise<OrderAttributes | null> => {
+): Promise<OrderAttributes & { campaign?: any } | null> => {
   try {
-    const order = await Order.findByPk(id);
-    return order ? (order.toJSON() as OrderAttributes) : null;
+    const order = await Order.findByPk(id, {
+      include: [
+        {
+          model: Campaign,
+          as: "campaign", // This should match the alias used in your model association
+        },
+      ],
+    });
+
+    if (!order) return null;
+
+    const orderJson = order.toJSON() as OrderAttributes & { campaign?: any };
+
+    return orderJson;
   } catch (error: any) {
     throw new Error(error.message || "Failed to fetch order by ID");
   }
