@@ -151,7 +151,7 @@ export class Order extends Model<OrderAttributes, OrderCreationAttributes> imple
   public state!: string;
   public priority_level!: "High" | "Medium" | "Low" | "Gold Agent";
   public age_range!: string;
-  public lead_requested!: boolean;
+  public lead_requested!: number;
   public fb_link?: string;
   public notes?: string;
   public area_to_use?: string;

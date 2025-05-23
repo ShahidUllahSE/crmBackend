@@ -11,20 +11,11 @@ export const createCampaign = async (
     if (!data || data.length === 0) {
       throw new Error("No campaign data provided.");
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
     const campaignName = data[0].campaignName;
     if (!campaignName) {
       throw new Error("Campaign name is missing.");
     }
-<<<<<<< HEAD
     // :x: Don't add required fields again, assuming they are sent from frontend
-=======
-
-    // ❌ Don't add required fields again, assuming they are sent from frontend
->>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
     const created = await Campaign.bulkCreate(data);
     return created.map((c) => c.get());
   } catch (error: any) {
@@ -150,20 +141,10 @@ export const deleteCampaign = async (id: number): Promise<boolean> => {
     if (!campaign) {
       throw new Error("Campaign field not found");
     }
-<<<<<<< HEAD
     const campaignName = campaign.get("campaignName"); // safer and avoids TS error
     await Campaign.destroy({
       where: { campaignName },
     });
-=======
-
-    const campaignName = campaign.get("campaignName"); // safer and avoids TS error
-
-    await Campaign.destroy({
-      where: { campaignName },
-    });
-
->>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
     return true;
   } catch (error: any) {
     throw new Error(`Error deleting campaign: ${error.message}`);

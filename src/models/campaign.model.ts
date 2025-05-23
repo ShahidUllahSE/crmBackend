@@ -69,10 +69,6 @@
 
 import { DataTypes, Model, Optional } from "sequelize";
 import db from "../../db";
-<<<<<<< HEAD
-=======
-
->>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
 // Defining the interface for Campaign attributes
 export interface CampaignAttributes {
   id: number;
@@ -85,17 +81,9 @@ export interface CampaignAttributes {
   multiple?: boolean;
   dynamic_fields?: any; // not needed for required fields, used for optional/dynamic ones
 }
-<<<<<<< HEAD
 // Defining the interface for creating Campaign (optional "id")
 export interface CampaignCreationAttributes
   extends Optional<CampaignAttributes, "id"> {}
-=======
-
-// Defining the interface for creating Campaign (optional "id")
-export interface CampaignCreationAttributes
-  extends Optional<CampaignAttributes, "id"> {}
-
->>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
 // Extending the Sequelize Model with the custom Campaign model class
 class CampaignModel
   extends Model<CampaignAttributes, CampaignCreationAttributes>
@@ -117,10 +105,6 @@ class CampaignModel
   public multiple?: boolean;
   public dynamic_fields?: any;
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
 // Define the Campaign model
 export const Campaign = db.define<CampaignModel>(
   "Campaign",
@@ -182,9 +166,5 @@ export const Campaign = db.define<CampaignModel>(
     ],
   }
 );
-<<<<<<< HEAD
-=======
-
->>>>>>> 45a58b1a9bc2bebd49d95f9a8045c2b60f7ded4a
 // Export the model
 export default Campaign;
