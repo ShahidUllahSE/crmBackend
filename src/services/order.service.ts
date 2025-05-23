@@ -28,7 +28,7 @@ export interface CreateOrderDTO {
 export const createOrder = async ( 
   orderData: CreateOrderDTO,
   createdBy: number
-): Promise<OrderAttributes> => {
+): Promise<any> => {
   try {
     const campaign = await Campaign.findByPk(orderData.campaign_id);
     if (!campaign) {
@@ -51,11 +51,22 @@ export const createOrder = async (
       assign_to_vendor: orderData.assign_to_vendor,
     });
 
-    return order.toJSON() as OrderAttributes;
+    // Fetch the newly created order with campaign details
+    const orderWithCampaign = await Order.findByPk(order.id, {
+      include: [
+        {
+          model: Campaign,
+          as: 'campaign',
+        },
+      ],
+    });
+
+    return orderWithCampaign?.toJSON();
   } catch (error: any) {
     throw new Error(error.message || "Failed to create order");
   }
 };
+
 
 // Function to get an order by ID
 // export const getOrderById = async (
@@ -131,12 +142,25 @@ export const deleteOrderById = async (id: number): Promise<boolean> => {
     throw new Error(error.message || "Failed to delete order");
   }
 };
-
-// Function to get all orders
 export const getAllOrders = async (): Promise<OrderAttributes[]> => {
   try {
-    const orders = await Order.findAll();
-    return orders.map((order) => order.toJSON() as OrderAttributes);
+    const orders = await Order.findAll({
+      include: [
+        {
+          model: Campaign,
+          as: 'campaign',
+        },
+      ],
+    });
+
+    // Include campaign data in the returned JSON
+    return orders.map((order) => {
+      const orderJson = order.toJSON() as any;
+      return {
+        ...orderJson,
+        campaign: orderJson.campaign, // included automatically
+      } as OrderAttributes;
+    });
   } catch (error: any) {
     throw new Error(error.message || "Failed to fetch orders");
   }
