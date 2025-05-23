@@ -10,7 +10,6 @@ export const getAllRolePermissions = async () => {
   }
 };
 
-// Service to get a role-permission relationship by roleId and permissionId
 export const getRolePermissionByIds = async (roleId: number, permissionId: number) => {
   try {
     const rolePermission = await RolePermission.findOne({
