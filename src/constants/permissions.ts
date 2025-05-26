@@ -16,4 +16,9 @@ export const PERMISSIONS = {
   ORDER_GET: "order:get",
   ORDER_UPDATE: "order:update",
   ORDER_DELETE: "order:delete",
+
+  // Lead permissions
+  LEAD_CREATE: "lead:create",
+  LEAD_GET_ALL: "lead:getAll",
+  LEAD_GET_BY_CAMPAIGN: "lead:getByCampaign",
 };
