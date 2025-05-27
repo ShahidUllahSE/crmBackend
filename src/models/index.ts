@@ -8,5 +8,11 @@ import "./chatmodels/message.model";
 import "./chatmodels/conversation.model";
 import "./chatmodels/conversationParticipant.model";
 
+import "./lead.model";
+
+import "./campaign.model";
+
+import "./activityLog.model";
+
 // Apply associations
 associateModels();

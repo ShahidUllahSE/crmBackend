@@ -2,27 +2,24 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import db from "../../db";
 
-// Define the attributes for a Lead
 export interface LeadAttributes {
   id: number;
   campaignName: string;
-  leadData: any; // this stores dynamic campaign fields
+  leadData: any;
 }
 
-// Define attributes used during creation (id is optional)
 export interface LeadCreationAttributes extends Optional<LeadAttributes, "id"> {}
 
-// Extend the Model
-class LeadModel extends Model<LeadAttributes, LeadCreationAttributes>
-  implements LeadAttributes {
+class Lead extends Model<LeadAttributes, LeadCreationAttributes> implements LeadAttributes {
   public id!: number;
   public campaignName!: string;
   public leadData!: any;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
 }
 
-// Define the model
-export const Lead = db.define<LeadModel>(
-  "Lead",
+Lead.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -39,6 +36,7 @@ export const Lead = db.define<LeadModel>(
     },
   },
   {
+    sequelize: db,
     tableName: "leads",
     timestamps: true,
     indexes: [
@@ -49,5 +47,4 @@ export const Lead = db.define<LeadModel>(
   }
 );
 
-// Export the model and interfaces
 export default Lead;
