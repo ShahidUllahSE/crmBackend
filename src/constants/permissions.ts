@@ -21,4 +21,6 @@ export const PERMISSIONS = {
   LEAD_CREATE: "lead:create",
   LEAD_GET_ALL: "lead:getAll",
   LEAD_GET_BY_CAMPAIGN: "lead:getByCampaign",
+  LEAD_UPDATE: "lead:update",           
+  LEAD_DELETE: "lead:delete",          
 };

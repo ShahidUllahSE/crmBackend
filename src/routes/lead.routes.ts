@@ -6,6 +6,7 @@ import { PERMISSIONS } from "../constants/permissions";
 
 const router = Router();
 
+// Create Lead
 router.post(
   "/leads",
   verifyToken,
@@ -13,6 +14,7 @@ router.post(
   LeadController.createLead
 );
 
+// Get All Leads
 router.get(
   "/leads",
   verifyToken,
@@ -20,11 +22,28 @@ router.get(
   LeadController.getAllLeads
 );
 
+// Get Leads by Campaign
 router.get(
   "/leads/campaign/:campaignName",
   verifyToken,
   checkPermission(PERMISSIONS.LEAD_GET_BY_CAMPAIGN),
   LeadController.getLeadsByCampaign
+);
+
+// Update Lead
+router.put(
+  "/leads/:id",
+  verifyToken,
+  checkPermission(PERMISSIONS.LEAD_UPDATE),
+  LeadController.updateLead
+);
+
+// Delete Lead
+router.delete(
+  "/leads/:id",
+  verifyToken,
+  checkPermission(PERMISSIONS.LEAD_DELETE),
+  LeadController.deleteLead
 );
 
 export default router;

@@ -7,6 +7,7 @@ dotenv.config();
 const db = new Sequelize("crm", "root", "", {
   host: process.env.DB_HOST,
   dialect: "mysql",
+  logging:false
 });
 
 export const connectDB = async () => {

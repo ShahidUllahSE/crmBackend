@@ -32,7 +32,7 @@ export const getAllCampaigns = async (): Promise<CampaignAttributes[]> => {
   } catch (error: any) {
     throw new Error(`Error retrieving campaigns: ${error.message}`);
   }
-};
+};  
 
 // ✅ Get all fields by campaign ID
 export const getCampaignById = async (
