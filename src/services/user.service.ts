@@ -227,33 +227,82 @@ import { UserAttributes } from "../interfaces/user.interface";
 import jwt from "jsonwebtoken"; // Make sure you have the `jsonwebtoken` package installed
 import { logActivity } from "./activity.service"; // Import activity service
 import { sendNotification } from "./notification.service"; // Import notification service
+import Role from "../models/role.model";
+
+// export const createUser = async (
+//   userData: Partial<UserAttributes>
+// ): Promise<UserAttributes> => {
+//   const { email, password, roleId } = userData;
+
+//   if (!email || !password || !roleId) {
+//     // Ensure userrole is provided
+//     throw new Error("Email, password, and user role are required!");
+//   }
+
+//   // Check if user already exists
+//   const existingUser = await User.findOne({ where: { email } });
+//   if (existingUser) {
+//     throw new Error("Email already in use!");
+//   }
+
+//   // Hash password
+//   const salt = await bcrypt.genSalt(10);
+//   userData.password = await bcrypt.hash(password, salt);
+
+//   // Ensure userrole is always defined
+//   const newUserData: UserAttributes = {
+//     ...userData,
+//     roleId: roleId,
+//     block: false,
+//     token: userData.token || "", // Assign default if token is missing
+//     created_at: new Date(),
+//     updated_at: new Date(),
+//   };
+
+//   const user = await User.create(newUserData);
+
+//   if (!user.id) {
+//     throw new Error("User ID not found after creation");
+//   }
+
+//   // Log the user registration activity
+//   await logActivity(user.id, "Registration", "User registered successfully");
+
+//   // Send a notification to the user about the successful registration
+//   await sendNotification(
+//     user.id,
+//     "Welcome! Your account has been successfully created."
+//   );
+
+//   return user;
+// };
+
+// services/user.service.ts
+
+
 
 export const createUser = async (
   userData: Partial<UserAttributes>
-): Promise<UserAttributes> => {
+): Promise<any> => { // returning any since role is added dynamically
   const { email, password, roleId } = userData;
 
   if (!email || !password || !roleId) {
-    // Ensure userrole is provided
     throw new Error("Email, password, and user role are required!");
   }
 
-  // Check if user already exists
   const existingUser = await User.findOne({ where: { email } });
   if (existingUser) {
     throw new Error("Email already in use!");
   }
 
-  // Hash password
   const salt = await bcrypt.genSalt(10);
   userData.password = await bcrypt.hash(password, salt);
 
-  // Ensure userrole is always defined
   const newUserData: UserAttributes = {
     ...userData,
-    roleId: roleId,
+    roleId,
     block: false,
-    token: userData.token || "", // Assign default if token is missing
+    token: userData.token || "",
     created_at: new Date(),
     updated_at: new Date(),
   };
@@ -264,19 +313,20 @@ export const createUser = async (
     throw new Error("User ID not found after creation");
   }
 
-  // Log the user registration activity
   await logActivity(user.id, "Registration", "User registered successfully");
+  await sendNotification(user.id, "Welcome! Your account has been successfully created.");
 
-  // Send a notification to the user about the successful registration
-  await sendNotification(
-    user.id,
-    "Welcome! Your account has been successfully created."
-  );
+  // Fetch role name from Role table
+  const role = await Role.findByPk(user.roleId);
 
-  return user;
+  return {
+    ...user.get(),
+    roleName: role?.name || null, // add roleName in the returned data
+  };
 };
 
-// services/user.service.ts
+
+
 export const loginUser = async (userData: {
   email: string;
   password: string;
@@ -340,27 +390,64 @@ export const loginUser = async (userData: {
   };
 };
 
-export const getAllUsers = async (): Promise<UserAttributes[]> => {
-  try {
-    const users = await User.findAll();
-    return users;
-  } catch (error) {
-    throw new Error("Error fetching users: " + (error as Error).message);
-  }
-};
+// export const getAllUsers = async (): Promise<UserAttributes[]> => {
+//   try {
+//     const users = await User.findAll();
+//     return users;
+//   } catch (error) {
+//     throw new Error("Error fetching users: " + (error as Error).message);
+//   }
+// };
+
+// export const getUserById = async (
+//   userId: number
+// ): Promise<UserAttributes | null> => {
+//   try {
+//     const user = await User.findByPk(userId); // Fetch user by primary key (ID)
+//     return user;
+//   } catch (error) {
+//     throw new Error("Error fetching user: " + (error as Error).message);
+//   }
+// };
+
+// Update user by ID
+
+
 
 export const getUserById = async (
   userId: number
-): Promise<UserAttributes | null> => {
-  try {
-    const user = await User.findByPk(userId); // Fetch user by primary key (ID)
-    return user;
-  } catch (error) {
-    throw new Error("Error fetching user: " + (error as Error).message);
+): Promise<any> => {
+  const user = await User.findByPk(userId);
+  if (!user) {
+    throw new Error("User not found!");
   }
+
+  const role = await Role.findByPk(user.roleId);
+
+  return {
+    ...user.get(),
+    roleName: role?.name || null,
+  };
 };
 
-// Update user by ID
+export const getAllUsers = async (): Promise<any[]> => {
+  const users = await User.findAll();
+
+  // Fetch roles for each user, or better use eager loading
+  const usersWithRole = await Promise.all(
+    users.map(async (user) => {
+      const role = await Role.findByPk(user.roleId);
+      return {
+        ...user.get(),
+        roleName: role?.name || null,
+      };
+    })
+  );
+
+  return usersWithRole;
+};
+
+
 export const updateUser = async (
   userId: string,
   updatedData: Partial<UserAttributes>
