@@ -26,7 +26,6 @@ import {
 
 // ✅ Get all campaigns (all fields)
 
-
 export const createCampaign = async (
   data: CampaignCreationAttributes[]
 ): Promise<CampaignAttributes> => {
@@ -41,15 +40,17 @@ export const createCampaign = async (
     }
 
     // Compose fields array from input
-    const fields = data.map((field) => ({
-      col_name: field.fields[0].col_name,
-      col_slug: field.fields[0].col_slug,
-      col_type: field.fields[0].col_type,
-      default_value: field.fields[0].default_value,
-      options: field.fields[0].options,
-      multiple: field.fields[0].multiple,
-      dynamic_fields: field.fields[0].dynamic_fields,
-    }));
+    // const fields = data.map((field) => ({
+    //   col_name: field.fields[0].col_name,
+    //   col_slug: field.fields[0].col_slug,
+    //   col_type: field.fields[0].col_type,
+    //   default_value: field.fields[0].default_value,
+    //   options: field.fields[0].options,
+    //   multiple: field.fields[0].multiple,
+    //   dynamic_fields: field.fields[0].dynamic_fields,
+    // }));
+
+    const fields = data[0].fields;
 
     // Save the campaign
     const created = await Campaign.create({
@@ -64,8 +65,6 @@ export const createCampaign = async (
   }
 };
 
-
-
 export const getAllCampaigns = async (): Promise<CampaignAttributes[]> => {
   try {
     const campaigns = await Campaign.findAll();
@@ -73,7 +72,7 @@ export const getAllCampaigns = async (): Promise<CampaignAttributes[]> => {
   } catch (error: any) {
     throw new Error(`Error retrieving campaigns: ${error.message}`);
   }
-};  
+};
 
 // ✅ Get all fields by campaign ID
 export const getCampaignById = async (
@@ -174,10 +173,6 @@ export const getCampaignById = async (
 //     throw new Error(`Error deleting campaign: ${error.message}`);
 //   }
 // };
-
-
-
-
 
 export const updateCampaign = async (
   id: number,
