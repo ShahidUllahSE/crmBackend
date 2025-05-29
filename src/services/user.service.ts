@@ -280,10 +280,11 @@ import Role from "../models/role.model";
 // services/user.service.ts
 
 
+// new one
 
 export const createUser = async (
   userData: Partial<UserAttributes>
-): Promise<any> => { // returning any since role is added dynamically
+): Promise<any> => {
   const { email, password, roleId } = userData;
 
   if (!email || !password || !roleId) {
@@ -313,17 +314,25 @@ export const createUser = async (
     throw new Error("User ID not found after creation");
   }
 
+  // Log activity and send notification
   await logActivity(user.id, "Registration", "User registered successfully");
   await sendNotification(user.id, "Welcome! Your account has been successfully created.");
 
-  // Fetch role name from Role table
-  const role = await Role.findByPk(user.roleId);
+  // ✅ Reload user with full role details
+  const userWithRole = await User.findByPk(user.id, {
+    include: [
+      {
+        model: Role,
+        as: "role", // match the alias defined in the association
+        attributes: ["id", "name", "description"], // customize as needed
+      },
+    ],
+  });
 
-  return {
-    ...user.get(),
-    roleName: role?.name || null, // add roleName in the returned data
-  };
+  return userWithRole;
 };
+
+
 
 
 
@@ -414,37 +423,36 @@ export const loginUser = async (userData: {
 
 
 
-export const getUserById = async (
-  userId: number
-): Promise<any> => {
-  const user = await User.findByPk(userId);
+export const getUserById = async (userId: number): Promise<any> => {
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: Role,
+        as: "role",
+        attributes: ["id", "name", "description"], // include any fields you want
+      },
+    ],
+  });
+
   if (!user) {
     throw new Error("User not found!");
   }
 
-  const role = await Role.findByPk(user.roleId);
-
-  return {
-    ...user.get(),
-    roleName: role?.name || null,
-  };
+  return user;
 };
 
 export const getAllUsers = async (): Promise<any[]> => {
-  const users = await User.findAll();
+  const users = await User.findAll({
+    include: [
+      {
+        model: Role,
+        as: "role",
+        attributes: ["id", "name", "description"], // or all fields if needed
+      },
+    ],
+  });
 
-  // Fetch roles for each user, or better use eager loading
-  const usersWithRole = await Promise.all(
-    users.map(async (user) => {
-      const role = await Role.findByPk(user.roleId);
-      return {
-        ...user.get(),
-        roleName: role?.name || null,
-      };
-    })
-  );
-
-  return usersWithRole;
+  return users;
 };
 
 
