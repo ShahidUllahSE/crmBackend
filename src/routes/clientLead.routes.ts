@@ -9,12 +9,12 @@ import { verifyToken } from "../middleware/verifyToken.middleware"; // Adjust as
 const router = Router();
 
 // POST /api/client-leads
-router.post("/", verifyToken, createClientLeadController);
+router.post("/createClientLead", verifyToken, createClientLeadController);
 
 // GET /api/client-leads/order/:orderId
-router.get("/order/:orderId", verifyToken, getClientLeadsByOrder);
+router.get("/GetClientOrder/:orderId", verifyToken, getClientLeadsByOrder);
 
 // GET /api/client-leads/:id
-router.get("/:id", verifyToken, getClientLead);
+router.get("/getClientLeadById:id", verifyToken, getClientLead);
 
 export default router;
