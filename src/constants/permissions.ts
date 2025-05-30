@@ -21,6 +21,14 @@ export const PERMISSIONS = {
   LEAD_CREATE: "lead:create",
   LEAD_GET_ALL: "lead:getAll",
   LEAD_GET_BY_CAMPAIGN: "lead:getByCampaign",
-  LEAD_UPDATE: "lead:update",           
-  LEAD_DELETE: "lead:delete",          
+  LEAD_UPDATE: "lead:update",
+  LEAD_DELETE: "lead:delete",
+
+  // ✅ Client Lead permissions
+  CLIENT_LEAD_CREATE: "clientLead:create",
+  CLIENT_LEAD_GET_ALL: "clientLead:getAll",
+  CLIENT_LEAD_GET_BY_ORDER: "clientLead:getByOrder",
+  CLIENT_LEAD_GET_BY_ID: "clientLead:getById",
+  CLIENT_LEAD_UPDATE: "clientLead:update",
+  CLIENT_LEAD_DELETE: "clientLead:delete",
 };
