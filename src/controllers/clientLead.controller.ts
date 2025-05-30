@@ -1,8 +1,16 @@
 import { Request, Response } from "express";
-import { createClientLead, getClientLeadsByOrderId, getClientLeadById } from "../services/clientLead.service";
+import {
+  createClientLead,
+  getClientLeadsByOrderId,
+  getClientLeadById,
+  getAllClientLeads,
+  updateClientLeadById,
+  deleteClientLeadById,
+} from "../services/clientLead.service";
 import { CustomRequest } from "../types/custom";
 
-export const createClientLeadController = async (req: CustomRequest, res: Response):Promise<any> => {
+// Create a client lead
+export const createClientLeadController = async (req: CustomRequest, res: Response): Promise<any> => {
   try {
     const userId = req.user?.id;
     const { order_id, campaign_id, leadData } = req.body;
@@ -34,24 +42,29 @@ export const createClientLeadController = async (req: CustomRequest, res: Respon
   }
 };
 
-export const getClientLeadsByOrder = async (req: Request, res: Response):Promise<any> => {
+// Get all client leads
+export const getAllClientLeadsController = async (_req: Request, res: Response): Promise<any> => {
   try {
-    const { orderId } = req.params;
-    const leads = await getClientLeadsByOrderId(Number(orderId));
-
-    return res.status(200).json({
-      success: true,
-      data: leads,
-    });
+    const leads = await getAllClientLeads();
+    return res.status(200).json({ success: true, data: leads });
   } catch (error: any) {
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch leads",
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-export const getClientLead = async (req: Request, res: Response):Promise<any> => {
+// Get client leads by order ID
+export const getClientLeadsByOrder = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { orderId } = req.params;
+    const leads = await getClientLeadsByOrderId(Number(orderId));
+    return res.status(200).json({ success: true, data: leads });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message || "Failed to fetch leads" });
+  }
+};
+
+// Get single client lead by ID
+export const getClientLead = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const lead = await getClientLeadById(Number(id));
@@ -61,6 +74,30 @@ export const getClientLead = async (req: Request, res: Response):Promise<any> =>
     }
 
     return res.status(200).json({ success: true, data: lead });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Update client lead
+export const updateClientLead = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const updatedLead = await updateClientLeadById(Number(id), updateData);
+    return res.status(200).json({ success: true, message: "Client lead updated", data: updatedLead });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Delete client lead
+export const deleteClientLead = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { id } = req.params;
+    const result = await deleteClientLeadById(Number(id));
+    return res.status(200).json({ success: true, message: result.message });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }

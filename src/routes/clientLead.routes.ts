@@ -3,18 +3,30 @@ import {
   createClientLeadController,
   getClientLeadsByOrder,
   getClientLead,
+  getAllClientLeadsController,
+  updateClientLead,
+  deleteClientLead,
 } from "../controllers/clientLead.controller";
-import { verifyToken } from "../middleware/verifyToken.middleware"; // Adjust as needed
+import { verifyToken } from "../middleware/verifyToken.middleware"; // Adjust if path differs
 
 const router = Router();
 
-// POST /api/client-leads
+// Create a new client lead
 router.post("/createClientLead", verifyToken, createClientLeadController);
 
-// GET /api/client-leads/order/:orderId
-router.get("/GetClientOrder/:orderId", verifyToken, getClientLeadsByOrder);
+// Get all client leads
+router.get("/getAllClientLeads", verifyToken, getAllClientLeadsController);
 
-// GET /api/client-leads/:id
-router.get("/getClientLeadById:id", verifyToken, getClientLead);
+// Get client leads by order ID
+router.get("/getClientOrder/:orderId", verifyToken, getClientLeadsByOrder);
+
+// Get a single client lead by ID
+router.get("/getClientLeadById/:id", verifyToken, getClientLead);
+
+// Update client lead by ID
+router.put("/updateClientLead/:id", verifyToken, updateClientLead);
+
+// Delete client lead by ID
+router.delete("/deleteClientLead/:id", verifyToken, deleteClientLead);
 
 export default router;
