@@ -93,3 +93,29 @@ export const updateRolePermissions = async (roleId: number, permissions: number[
 
   return await getAllRolesWithPermissions();
 };
+
+
+export const deleteRole = async (roleId: number) => {
+  try {
+    // Check if role exists
+    const role = await Role.findByPk(roleId);
+    if (!role) {
+      return { message: "Role not found", success: false };
+    }
+
+    // Delete associated role-permission entries first
+    await RolePermission.destroy({ where: { role_id: roleId } });
+
+    // Delete the role itself
+    await Role.destroy({ where: { id: roleId } });
+
+    return { message: "Role deleted successfully", success: true };
+  } catch (error: any) {
+    console.error("Error deleting role:", error);
+    return {
+      message: "Error occurred while deleting the role.",
+      success: false,
+      details: error.message,
+    };
+  }
+};

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createRole, getAllRolesWithPermissions, updateRolePermissions } from "../services/role.service";
+import { createRole, deleteRole, getAllRolesWithPermissions, updateRolePermissions } from "../services/role.service";
 
 export const createRoleController = async (req: Request, res: Response):Promise<any> => {
   try {
@@ -26,6 +26,22 @@ export const updateRolePermissionsController = async (req: Request, res: Respons
 
     const updated = await updateRolePermissions(roleId, permissions);
     return res.status(200).json({ message: "Role permissions updated", roles: updated });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+
+export const deleteRoleController = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const roleId = parseInt(req.params.id);
+    const result = await deleteRole(roleId);
+
+    if (!result.success) {
+      return res.status(404).json({ message: result.message });
+    }
+
+    return res.status(200).json({ message: result.message });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
