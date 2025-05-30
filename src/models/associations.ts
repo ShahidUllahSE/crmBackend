@@ -53,6 +53,8 @@ Order.belongsTo(Campaign, {
   });
 
   ClientLead.belongsTo(Order, { foreignKey: "order_id", as: "order" });
-ClientLead.belongsTo(Campaign, { foreignKey: "campaign_id", as: "campaign" });
-Order.hasMany(ClientLead, { foreignKey: "order_id", as: "clientLeads" });
-Campaign.hasMany(ClientLead, { foreignKey: "campaign_id", as: "clientLeads" });
+  ClientLead.belongsTo(Campaign, { foreignKey: "campaign_id", as: "campaign" });
+  
+  Order.hasMany(ClientLead, { foreignKey: "order_id", as: "clientLeads" });
+  Campaign.hasMany(ClientLead, { foreignKey: "campaign_id", as: "clientLeads" });
+  
