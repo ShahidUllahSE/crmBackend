@@ -14,7 +14,7 @@ export interface UserAttributes {
   website?: string;
   coverage?: string;
   linkedin?: string;
-  useruimage?: string;
+  userImage?: string | null | undefined;
   vendor?: string;
   userrole?: "admin" | "vendor" | "client";
   smtpemail?: string;

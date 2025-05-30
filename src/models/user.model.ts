@@ -56,7 +56,7 @@ export const User = db.define<UserModel>("User", {
     type: DataTypes.STRING(100),
     allowNull: true,
   },
-  useruimage: {
+  userImage: {
     type: DataTypes.STRING(250),
     allowNull: true,
   },

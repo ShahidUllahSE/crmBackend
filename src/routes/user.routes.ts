@@ -10,11 +10,14 @@ import {
 import { checkPermission } from "../middleware/checkPermission";
 import { PERMISSIONS } from "../constants/permissions";
 import { verifyToken } from "../middleware/verifyToken.middleware";
+import { uploadImageMiddleware } from "../middleware/uploadImage";
 
 const router = express.Router();
 
 router.post(
   "/registerr",
+  uploadImageMiddleware("userImage"),
+
   //   checkPermission(PERMISSIONS.USER_CREATE),
   registerUser
 );
@@ -37,6 +40,7 @@ router.get(
 router.put(
   "/updateUserById/:id",
   verifyToken,
+  uploadImageMiddleware("userImage"),  
   checkPermission(PERMISSIONS.USER_UPDATE),
   updateUserController
 );
