@@ -1,4 +1,6 @@
 import ClientLead, { ClientLeadCreationAttributes } from "../models/clientLead.model";
+import Campaign from "../models/campaign.model"; // import your Campaign model
+import Order from "../models/order.model"; // import your Order model
 
 // Create a new client lead
 export const createClientLead = async (leadData: ClientLeadCreationAttributes) => {
@@ -6,27 +8,54 @@ export const createClientLead = async (leadData: ClientLeadCreationAttributes) =
   return lead;
 };
 
-// Get all client leads for a specific order
+// Get all client leads for a specific order, including full campaign & order data
 export const getClientLeadsByOrderId = async (orderId: number) => {
   const leads = await ClientLead.findAll({
     where: { order_id: orderId },
-    include: ["campaign", "order"],
+    include: [
+      {
+        model: Campaign,
+        as: "campaign",
+      },
+      {
+        model: Order,
+        as: "order",
+      },
+    ],
   });
   return leads;
 };
 
-// Get a single client lead by ID
+// Get a single client lead by ID, including full campaign & order data
 export const getClientLeadById = async (id: number) => {
   const lead = await ClientLead.findByPk(id, {
-    include: ["campaign", "order"],
+    include: [
+      {
+        model: Campaign,
+        as: "campaign",
+      },
+      {
+        model: Order,
+        as: "order",
+      },
+    ],
   });
   return lead;
 };
 
-// Get all client leads
+// Get all client leads, including full campaign & order data
 export const getAllClientLeads = async () => {
   const leads = await ClientLead.findAll({
-    include: ["campaign", "order"],
+    include: [
+      {
+        model: Campaign,
+        as: "campaign",
+      },
+      {
+        model: Order,
+        as: "order",
+      },
+    ],
   });
   return leads;
 };

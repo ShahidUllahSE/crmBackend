@@ -5,6 +5,7 @@ import {
   getOrderByIdController,
   updateOrderByIdController,
   deleteOrderByIdController,
+  setOrderBlockStatusController
 } from "../controllers/order.controller";
 import { verifyToken } from "../middleware/verifyToken.middleware";
 import { checkPermission } from "../middleware/checkPermission";
@@ -38,6 +39,13 @@ router.put(
   verifyToken,
   checkPermission(PERMISSIONS.ORDER_UPDATE),
   updateOrderByIdController
+);
+
+router.patch(
+  "/orders/:id/block-status",
+  verifyToken,
+  checkPermission(PERMISSIONS.ORDER_UPDATESTATUS), // or another permission for block/unblock
+  setOrderBlockStatusController
 );
 
 router.delete(

@@ -26,11 +26,11 @@ export const createUser = async (
   const newUserData: UserAttributes = {
     ...userData,
     roleId,
-    block: false,
+    status: "active", // ✅ Set default status to active
     token: userData.token || "",
     created_at: new Date(),
     updated_at: new Date(),
-    userImage: userData.userImage || null, // Accept image URL or null if none
+    userImage: userData.userImage || null,
   };
 
   const user = await User.create(newUserData);
@@ -39,11 +39,9 @@ export const createUser = async (
     throw new Error("User ID not found after creation");
   }
 
-  // Log activity and send notification
   await logActivity(user.id, "Registration", "User registered successfully");
   await sendNotification(user.id, "Welcome! Your account has been successfully created.");
 
-  // Reload user with role details
   const userWithRole = await User.findByPk(user.id, {
     include: [
       {
@@ -63,11 +61,8 @@ export const loginUser = async (userData: {
 }): Promise<any> => {
   const { email, password } = userData;
 
-  if (!password) {
-    throw new Error("Password is required!");
-  }
-  if (!email) {
-    throw new Error("Email is required!");
+  if (!email || !password) {
+    throw new Error("Email and password are required!");
   }
 
   const user = await User.findOne({ where: { email } });
@@ -77,6 +72,11 @@ export const loginUser = async (userData: {
 
   if (!user.password) {
     throw new Error("User password is missing!");
+  }
+
+  // ✅ Check if user is blocked
+  if (user.status === "blocked") {
+    throw new Error("Your account has been blocked. Please contact support.");
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -104,9 +104,9 @@ export const loginUser = async (userData: {
       lastname: user.lastname,
       email: user.email,
       userrole: user.userrole,
-      block: user.block,
+      status: user.status, // ✅ Return new status field
       last_login: user.last_login,
-      userImage: user.userImage || null, // return image URL if any
+      userImage: user.userImage || null,
     },
     token,
   };
@@ -150,18 +150,15 @@ export const updateUser = async (
 ): Promise<any> => {
   try {
     const user = await User.findByPk(userId);
-
     if (!user) {
       throw new Error("User not found!");
     }
 
-    // If password is updated, hash it
     if (updatedData.password) {
       const salt = await bcrypt.genSalt(10);
       updatedData.password = await bcrypt.hash(updatedData.password, salt);
     }
 
-    // Update userImage if present in updatedData
     if (updatedData.userImage === undefined) {
       // do nothing
     } else if (updatedData.userImage === null) {
@@ -169,7 +166,6 @@ export const updateUser = async (
     }
 
     await user.update(updatedData);
-
     return user;
   } catch (error: any) {
     throw new Error(error.message);
@@ -179,14 +175,52 @@ export const updateUser = async (
 export const deleteUser = async (userId: string): Promise<string> => {
   try {
     const user = await User.findByPk(userId);
-
     if (!user) {
       throw new Error("User not found!");
     }
 
     await user.destroy();
-
     return "User deleted successfully!";
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
+export const blockOrUnblockUser = async (
+  userId: string,
+  action: "block" | "unblock"
+): Promise<string> => {
+  try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw new Error("User not found!");
+    }
+
+    const userIdNum = user.id;
+    if (userIdNum === undefined) {
+      throw new Error("User ID is missing.");
+    }
+
+    if (action === "block") {
+      if (user.status === "blocked") {
+        return "User is already blocked.";
+      }
+      await user.update({ status: "blocked" });
+      await logActivity(userIdNum, "Account Blocked", "User account was blocked.");
+      await sendNotification(userIdNum, "Your account has been blocked. Please contact support.");
+      return "User has been blocked successfully.";
+    } else if (action === "unblock") {
+      if (user.status === "active") {
+        return "User is already active.";
+      }
+      await user.update({ status: "active" });
+      await logActivity(userIdNum, "Account Unblocked", "User account was unblocked.");
+      await sendNotification(userIdNum, "Your account has been unblocked. You can now log in.");
+      return "User has been unblocked successfully.";
+    } else {
+      throw new Error("Invalid action. Use 'block' or 'unblock'.");
+    }
   } catch (error: any) {
     throw new Error(error.message);
   }

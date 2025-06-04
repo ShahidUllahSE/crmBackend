@@ -138,18 +138,20 @@ export interface OrderAttributes {
     id: number;
     name: string;
   };
+  is_blocked: boolean; // ✅ New field added
   created_at: Date;
   updated_at: Date;
 }
 
-export interface OrderCreationAttributes extends Optional<OrderAttributes, "id" | "created_at" | "updated_at"> {}
+export interface OrderCreationAttributes
+  extends Optional<OrderAttributes, "id" | "created_at" | "updated_at" | "is_blocked"> {}
 
 export class Order extends Model<OrderAttributes, OrderCreationAttributes> implements OrderAttributes {
   public id!: number;
   public agent!: string;
   public campaign_id!: number;
   public state!: string;
-  public priority_level!: "High" | "Medium" | "Low" | "Gold Agent";
+  public priority_level!: "High" | "Medium" | "Low" | "Gold Agent" | "Onhold";
   public age_range!: string;
   public lead_requested!: number;
   public fb_link?: string;
@@ -159,6 +161,7 @@ export class Order extends Model<OrderAttributes, OrderCreationAttributes> imple
   public created_by!: number;
   public assign_to_client?: { id: number; name: string };
   public assign_to_vendor?: { id: number; name: string };
+  public is_blocked!: boolean; // ✅ New field
   public created_at!: Date;
   public updated_at!: Date;
 }
@@ -183,7 +186,7 @@ Order.init(
       allowNull: false,
     },
     priority_level: {
-      type: DataTypes.ENUM("High", "Medium", "Low", "Gold Agent"),
+      type: DataTypes.ENUM("High", "Medium", "Low", "Gold Agent", "Onhold"),
       allowNull: false,
     },
     age_range: {
@@ -221,6 +224,11 @@ Order.init(
     assign_to_vendor: {
       type: DataTypes.JSON,
       allowNull: true,
+    },
+    is_blocked: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
     created_at: {
       type: DataTypes.DATE,

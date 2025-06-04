@@ -56,6 +56,10 @@ export const getAllClientLeadsController = async (_req: Request, res: Response):
 export const getClientLeadsByOrder = async (req: Request, res: Response): Promise<any> => {
   try {
     const { orderId } = req.params;
+    if (!orderId || isNaN(Number(orderId))) {
+      return res.status(400).json({ success: false, message: "Invalid orderId parameter" });
+    }
+
     const leads = await getClientLeadsByOrderId(Number(orderId));
     return res.status(200).json({ success: true, data: leads });
   } catch (error: any) {
@@ -67,6 +71,10 @@ export const getClientLeadsByOrder = async (req: Request, res: Response): Promis
 export const getClientLead = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ success: false, message: "Invalid lead ID parameter" });
+    }
+
     const lead = await getClientLeadById(Number(id));
 
     if (!lead) {
@@ -83,6 +91,10 @@ export const getClientLead = async (req: Request, res: Response): Promise<any> =
 export const updateClientLead = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ success: false, message: "Invalid lead ID parameter" });
+    }
+
     const updateData = req.body;
 
     const updatedLead = await updateClientLeadById(Number(id), updateData);
@@ -96,6 +108,10 @@ export const updateClientLead = async (req: Request, res: Response): Promise<any
 export const deleteClientLead = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ success: false, message: "Invalid lead ID parameter" });
+    }
+
     const result = await deleteClientLeadById(Number(id));
     return res.status(200).json({ success: true, message: result.message });
   } catch (error: any) {

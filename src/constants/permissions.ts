@@ -4,6 +4,7 @@ export const PERMISSIONS = {
   USER_GET: "user:get",
   USER_UPDATE: "user:update",
   USER_DELETE: "user:delete",
+  USER_UPDATESTATUS: "user:updateStatus",
 
   // Campaign permissions
   CAMPAIGN_CREATE: "campaign:create",
@@ -16,7 +17,7 @@ export const PERMISSIONS = {
   ORDER_GET: "order:get",
   ORDER_UPDATE: "order:update",
   ORDER_DELETE: "order:delete",
-
+  ORDER_UPDATESTATUS:"order:updateStatus",
   // Lead permissions
   LEAD_CREATE: "lead:create",
   LEAD_GET_ALL: "lead:getAll",
