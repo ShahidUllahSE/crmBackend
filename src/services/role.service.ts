@@ -3,7 +3,10 @@ import Permission from "../models/permission.model";
 import RolePermission from "../models/rolePermission.model";
 
 // Service to create a role and associate permissions
-export const createRole = async (roleData: { name: string, permissions: number[] }) => {
+export const createRole = async (roleData: {
+  name: string;
+  permissions: number[];
+}) => {
   const { name, permissions } = roleData;
 
   try {
@@ -15,13 +18,13 @@ export const createRole = async (roleData: { name: string, permissions: number[]
       throw new Error("Role creation failed, role ID is null.");
     }
 
-    console.log("Role created with ID:", role.id);  // Debugging log to verify role ID
+    console.log("Role created with ID:", role.id); // Debugging log to verify role ID
 
     // Associate permissions if provided
     if (permissions && permissions.length > 0) {
       // Fetch the permissions from the database
       const existingPermissions = await Permission.findAll({
-        where: { id: permissions }
+        where: { id: permissions },
       });
 
       // Ensure permissions are valid
@@ -31,8 +34,8 @@ export const createRole = async (roleData: { name: string, permissions: number[]
 
       // Map and create role_permissions entries
       const rolePermissions = existingPermissions.map((permission: any) => ({
-        roleId: role.id,  // Corrected to `roleId`
-        permissionId: permission.id
+        roleId: role.id, // Corrected to `roleId`
+        permissionId: permission.id,
       }));
 
       // Insert role_permissions entries in bulk
@@ -48,52 +51,59 @@ export const createRole = async (roleData: { name: string, permissions: number[]
     console.error("Error creating role:", error);
 
     // Handle Sequelize validation errors
-    if (error.name === 'SequelizeValidationError') {
+    if (error.name === "SequelizeValidationError") {
       const errorMessages = error.errors.map((err: any) => err.message);
       return { message: "Validation error", details: errorMessages };
     }
 
     // Handle foreign key constraint error
-    if (error.code === 'ER_NO_REFERENCED_ROW_2') {
-      return { message: "Foreign key constraint failed. Ensure role and permission IDs are valid.", details: error.sqlMessage };
+    if (error.code === "ER_NO_REFERENCED_ROW_2") {
+      return {
+        message:
+          "Foreign key constraint failed. Ensure role and permission IDs are valid.",
+        details: error.sqlMessage,
+      };
     }
 
     // Handle other types of errors
-    return { message: "Error occurred while creating the role.", details: error.message };
+    return {
+      message: "Error occurred while creating the role.",
+      details: error.message,
+    };
   }
 };
-
-
 
 export const getAllRolesWithPermissions = async () => {
   const roles = await Role.findAll({
     include: [
       {
         model: Permission,
-        through: { attributes: [] }  // exclude join table data
-      }
-    ]
+        through: { attributes: [] }, // exclude join table data
+      },
+    ],
   });
   return roles;
 };
 
-export const updateRolePermissions = async (roleId: number, permissions: number[]) => {
+export const updateRolePermissions = async (
+  roleId: number,
+  permissions: number[]
+) => {
   const role = await Role.findByPk(roleId);
   if (!role) throw new Error("Role not found");
 
   // Remove existing permissions
-  await RolePermission.destroy({ where: { role_id: roleId } });
+  await RolePermission.destroy({ where: { roleId: roleId } });
 
   // Add new permissions
-  const newMappings = permissions.map(pid => ({
-    role_id: roleId,
-    permission_id: pid,
+  const newMappings = permissions.map((pid) => ({
+    roleId: roleId,
+    permissionId: pid,
   }));
   await RolePermission.bulkCreate(newMappings);
 
   return await getAllRolesWithPermissions();
 };
-
 
 export const deleteRole = async (roleId: number) => {
   try {
@@ -104,7 +114,7 @@ export const deleteRole = async (roleId: number) => {
     }
 
     // Delete associated role-permission entries first
-    await RolePermission.destroy({ where: { role_id: roleId } });
+    await RolePermission.destroy({ where: { roleId: roleId } });
 
     // Delete the role itself
     await Role.destroy({ where: { id: roleId } });
