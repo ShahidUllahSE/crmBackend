@@ -1,16 +1,14 @@
-// models/user.model.ts
 import { DataTypes, Model, Optional } from "sequelize";
 import db from "../../db";
 import { UserAttributes } from "../interfaces/user.interface";
-import Role from "./role.model"; // Import the Role model
+import Role from "./role.model";
 
 interface UserCreationAttributes extends Optional<UserAttributes, "id" | "created_at" | "updated_at"> {}
 
-// ✅ Extend Model and include the optional role association
 interface UserModel extends Model<UserAttributes, UserCreationAttributes>, UserAttributes {
   created_at: Date;
   updated_at: Date;
-  role?: typeof Role; // Optional role association
+  role?: typeof Role;
 }
 
 export const User = db.define<UserModel>("User", {
@@ -140,9 +138,10 @@ export const User = db.define<UserModel>("User", {
     type: DataTypes.STRING(250),
     allowNull: true,
   },
-  block: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true,
+  status: {
+    type: DataTypes.ENUM("active", "blocked"),
+    allowNull: false,
+    defaultValue: "active",
   },
   referred_to: {
     type: DataTypes.STRING(250),
@@ -171,13 +170,10 @@ export const User = db.define<UserModel>("User", {
   updatedAt: "updated_at",
 });
 
-// ✅ Update `updated_at` on update
 User.beforeUpdate((user) => {
   user.updated_at = new Date();
 });
 
-// ✅ Define association
 User.belongsTo(Role, { foreignKey: "roleId", as: "role" });
 
 export default User;
-

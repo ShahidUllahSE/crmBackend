@@ -6,6 +6,7 @@ import {
   login,
   registerUser,
   updateUserController,
+  blockOrUnblockUserController,
 } from "../controllers/user.controller";
 import { checkPermission } from "../middleware/checkPermission";
 import { PERMISSIONS } from "../constants/permissions";
@@ -17,8 +18,7 @@ const router = express.Router();
 router.post(
   "/registerr",
   uploadImageMiddleware("userImage"),
-
-  //   checkPermission(PERMISSIONS.USER_CREATE),
+  // checkPermission(PERMISSIONS.USER_CREATE), // Uncomment if needed
   registerUser
 );
 
@@ -30,6 +30,7 @@ router.get(
   checkPermission(PERMISSIONS.USER_GET),
   getUsers
 );
+
 router.get(
   "/getUserById/:id",
   verifyToken,
@@ -40,7 +41,7 @@ router.get(
 router.put(
   "/updateUserById/:id",
   verifyToken,
-  uploadImageMiddleware("userImage"),  
+  uploadImageMiddleware("userImage"),
   checkPermission(PERMISSIONS.USER_UPDATE),
   updateUserController
 );
@@ -50,6 +51,14 @@ router.delete(
   verifyToken,
   checkPermission(PERMISSIONS.USER_DELETE),
   deleteUserController
+);
+
+// ✅ New route: Block or Unblock a user
+router.put(
+  "/blockOrUnblockUser/:id",
+  verifyToken,
+  checkPermission(PERMISSIONS.USER_UPDATESTATUS),
+  blockOrUnblockUserController
 );
 
 export default router;

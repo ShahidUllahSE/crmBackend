@@ -68,17 +68,6 @@ export const createOrder = async (
 };
 
 
-// Function to get an order by ID
-// export const getOrderById = async (
-//   id: number
-// ): Promise<OrderAttributes | null> => {
-//   try {
-//     const order = await Order.findByPk(id);
-//     return order ? (order.toJSON() as OrderAttributes) : null;
-//   } catch (error: any) {
-//     throw new Error(error.message || "Failed to fetch order by ID");
-//   }
-// };
 
 
 export const getOrderById = async (
@@ -163,5 +152,21 @@ export const getAllOrders = async (): Promise<OrderAttributes[]> => {
     });
   } catch (error: any) {
     throw new Error(error.message || "Failed to fetch orders");
+  }
+};
+// Unified function to set block status
+export const setOrderBlockStatus = async (
+  id: number,
+  blockStatus: boolean
+): Promise<OrderAttributes | null> => {
+  try {
+    const order = await Order.findByPk(id);
+    if (!order) {
+      throw new Error("Order not found");
+    }
+    await order.update({ is_blocked: blockStatus });
+    return order.toJSON() as OrderAttributes;
+  } catch (error: any) {
+    throw new Error(error.message || "Failed to update block status");
   }
 };

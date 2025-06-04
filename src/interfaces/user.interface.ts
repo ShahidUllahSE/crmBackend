@@ -33,7 +33,7 @@ export interface UserAttributes {
   branchlogo?: string;
   branchlogoheight?: string;
   branchlogowidth?: string;
-  block?: boolean;
+  status?: "active" | "blocked"; // ✅ Added status field here
   referred_to?: string;
   last_login?: Date;
   token?: string;

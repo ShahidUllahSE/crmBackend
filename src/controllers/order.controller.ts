@@ -5,7 +5,8 @@ import {
   getOrderById,
   updateOrderById,
   deleteOrderById,
-  getAllOrders
+  getAllOrders,
+  setOrderBlockStatus
 } from "../services/order.service";
 import { CreateOrderDTO } from "../services/order.service";
 
@@ -178,6 +179,40 @@ export const getAllOrdersController = async (req: CustomRequest, res: Response):
     return res.status(400).json({
       success: false,
       message: error.message || "An error occurred while fetching orders",
+    });
+  }
+};
+
+// Block or Unblock Order by ID
+export const setOrderBlockStatusController = async (req: CustomRequest, res: Response): Promise<any> => {
+  const { id } = req.params;
+  const { block } = req.body; // expects { block: true } to block or { block: false } to unblock
+
+  if (typeof block !== 'boolean') {
+    return res.status(400).json({
+      success: false,
+      message: "'block' must be a boolean value",
+    });
+  }
+
+  try {
+    const updatedOrder = await setOrderBlockStatus(Number(id), block);
+    if (!updatedOrder) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Order ${block ? "blocked" : "unblocked"} successfully`,
+      data: updatedOrder,
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || "An error occurred while updating block status",
     });
   }
 };
