@@ -13,14 +13,17 @@ import { CustomRequest } from "../types/custom";
 export const createClientLeadController = async (req: CustomRequest, res: Response): Promise<any> => {
   try {
     const userId = req.user?.id;
-    const { order_id, campaign_id, leadData } = req.body;
+    const { order_id, campaign, leadData } = req.body;
 
-    if (!order_id || !campaign_id || !leadData) {
+    // Validate campaign object and required fields
+    if (!order_id || !campaign || !campaign.id || !leadData) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields: order_id, campaign_id, leadData",
+        message: "Missing required fields: order_id, campaign.id, leadData",
       });
     }
+
+    const campaign_id = campaign.id;
 
     const lead = await createClientLead({
       order_id,
@@ -41,6 +44,7 @@ export const createClientLeadController = async (req: CustomRequest, res: Respon
     });
   }
 };
+
 
 // Get all client leads
 export const getAllClientLeadsController = async (_req: Request, res: Response): Promise<any> => {
