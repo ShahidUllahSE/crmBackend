@@ -30,14 +30,8 @@ export const getClientLeadsByOrderId = async (orderId: number) => {
 export const getClientLeadById = async (id: number) => {
   const lead = await ClientLead.findByPk(id, {
     include: [
-      {
-        model: Campaign,
-        as: "campaign",
-      },
-      {
-        model: Order,
-        as: "order",
-      },
+      { model: Campaign, as: "campaign" },
+      { model: Order, as: "order" },
     ],
   });
   return lead;
@@ -47,14 +41,8 @@ export const getClientLeadById = async (id: number) => {
 export const getAllClientLeads = async () => {
   const leads = await ClientLead.findAll({
     include: [
-      {
-        model: Campaign,
-        as: "campaign",
-      },
-      {
-        model: Order,
-        as: "order",
-      },
+      { model: Campaign, as: "campaign" },
+      { model: Order, as: "order" },
     ],
   });
   return leads;
