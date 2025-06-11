@@ -10,7 +10,10 @@ import {
 import { CustomRequest } from "../types/custom";
 
 // Create a client lead
-export const createClientLeadController = async (req: CustomRequest, res: Response): Promise<any> => {
+export const createClientLeadController = async (
+  req: CustomRequest,
+  res: Response
+): Promise<any> => {
   try {
     const userId = req.user?.id;
     const { order_id, campaign, leadData } = req.body;
@@ -45,9 +48,11 @@ export const createClientLeadController = async (req: CustomRequest, res: Respon
   }
 };
 
-
 // Get all client leads
-export const getAllClientLeadsController = async (_req: Request, res: Response): Promise<any> => {
+export const getAllClientLeadsController = async (
+  _req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const leads = await getAllClientLeads();
     return res.status(200).json({ success: true, data: leads });
@@ -57,32 +62,49 @@ export const getAllClientLeadsController = async (_req: Request, res: Response):
 };
 
 // Get client leads by order ID
-export const getClientLeadsByOrder = async (req: Request, res: Response): Promise<any> => {
+export const getClientLeadsByOrder = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { orderId } = req.params;
     if (!orderId || isNaN(Number(orderId))) {
-      return res.status(400).json({ success: false, message: "Invalid orderId parameter" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid orderId parameter" });
     }
 
     const leads = await getClientLeadsByOrderId(Number(orderId));
     return res.status(200).json({ success: true, data: leads });
   } catch (error: any) {
-    return res.status(500).json({ success: false, message: error.message || "Failed to fetch leads" });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message || "Failed to fetch leads",
+      });
   }
 };
 
 // Get single client lead by ID
-export const getClientLead = async (req: Request, res: Response): Promise<any> => {
+export const getClientLead = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { id } = req.params;
     if (!id || isNaN(Number(id))) {
-      return res.status(400).json({ success: false, message: "Invalid lead ID parameter" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid lead ID parameter" });
     }
 
     const lead = await getClientLeadById(Number(id));
 
     if (!lead) {
-      return res.status(404).json({ success: false, message: "Lead not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Lead not found" });
     }
 
     return res.status(200).json({ success: true, data: lead });
@@ -92,28 +114,44 @@ export const getClientLead = async (req: Request, res: Response): Promise<any> =
 };
 
 // Update client lead
-export const updateClientLead = async (req: Request, res: Response): Promise<any> => {
+export const updateClientLead = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { id } = req.params;
     if (!id || isNaN(Number(id))) {
-      return res.status(400).json({ success: false, message: "Invalid lead ID parameter" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid lead ID parameter" });
     }
 
     const updateData = req.body;
 
     const updatedLead = await updateClientLeadById(Number(id), updateData);
-    return res.status(200).json({ success: true, message: "Client lead updated", data: updatedLead });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Client lead updated",
+        data: updatedLead,
+      });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 // Delete client lead
-export const deleteClientLead = async (req: Request, res: Response): Promise<any> => {
+export const deleteClientLead = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { id } = req.params;
     if (!id || isNaN(Number(id))) {
-      return res.status(400).json({ success: false, message: "Invalid lead ID parameter" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid lead ID parameter" });
     }
 
     const result = await deleteClientLeadById(Number(id));

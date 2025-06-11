@@ -114,6 +114,7 @@
 // export default Order;
 
 // models/order.model.ts
+
 import { DataTypes, Model, Optional } from "sequelize";
 import db from "../../db";
 
@@ -144,9 +145,15 @@ export interface OrderAttributes {
 }
 
 export interface OrderCreationAttributes
-  extends Optional<OrderAttributes, "id" | "created_at" | "updated_at" | "is_blocked"> {}
+  extends Optional<
+    OrderAttributes,
+    "id" | "created_at" | "updated_at" | "is_blocked"
+  > {}
 
-export class Order extends Model<OrderAttributes, OrderCreationAttributes> implements OrderAttributes {
+export class Order
+  extends Model<OrderAttributes, OrderCreationAttributes>
+  implements OrderAttributes
+{
   public id!: number;
   public agent!: string;
   public campaign_id!: number;
