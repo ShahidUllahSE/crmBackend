@@ -1,6 +1,7 @@
 import { OrderAttributes } from "../models/order.model";
 import Order from "../models/order.model";
 import Campaign from "../models/campaign.model";
+import { getPagination, getPagingData } from "../utils/paginate";
 
 // DTO for creating an order
 export interface CreateOrderDTO {
@@ -131,27 +132,28 @@ export const deleteOrderById = async (id: number): Promise<boolean> => {
     throw new Error(error.message || "Failed to delete order");
   }
 };
-export const getAllOrders = async (): Promise<OrderAttributes[]> => {
+export const getAllOrders = async (
+  page: number = 1,
+  limit: number = 10
+): Promise<ReturnType<typeof getPagingData>> => {
   try {
-    const orders = await Order.findAll({
+    const { offset, limit: pageLimit } = getPagination({ page, limit });
+
+    const result = await Order.findAndCountAll({
+      offset,
+      limit: pageLimit,
       include: [
         {
           model: Campaign,
-          as: 'campaign',
+          as: "campaign",
         },
       ],
+      order: [["created_at", "DESC"]], // optional: sort by date
     });
 
-    // Include campaign data in the returned JSON
-    return orders.map((order) => {
-      const orderJson = order.toJSON() as any;
-      return {
-        ...orderJson,
-        campaign: orderJson.campaign, // included automatically
-      } as OrderAttributes;
-    });
+    return getPagingData(result, page, pageLimit);
   } catch (error: any) {
-    throw new Error(error.message || "Failed to fetch orders");
+    throw new Error(error.message || "Failed to fetch paginated orders");
   }
 };
 // Unified function to set block status

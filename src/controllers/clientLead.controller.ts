@@ -50,17 +50,27 @@ export const createClientLeadController = async (
 
 // Get all client leads
 export const getAllClientLeadsController = async (
-  _req: Request,
+  req: Request,
   res: Response
 ): Promise<any> => {
   try {
-    const leads = await getAllClientLeads();
-    return res.status(200).json({ success: true, data: leads });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const leads = await getAllClientLeads(page, limit);
+
+    return res.status(200).json({
+      success: true,
+      message: "Client leads fetched successfully",
+      ...leads, // includes: totalItems, data, totalPages, currentPage
+    });
   } catch (error: any) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
-
 // Get client leads by order ID
 export const getClientLeadsByOrder = async (
   req: Request,
@@ -77,12 +87,10 @@ export const getClientLeadsByOrder = async (
     const leads = await getClientLeadsByOrderId(Number(orderId));
     return res.status(200).json({ success: true, data: leads });
   } catch (error: any) {
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: error.message || "Failed to fetch leads",
-      });
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch leads",
+    });
   }
 };
 
@@ -129,13 +137,11 @@ export const updateClientLead = async (
     const updateData = req.body;
 
     const updatedLead = await updateClientLeadById(Number(id), updateData);
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Client lead updated",
-        data: updatedLead,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Client lead updated",
+      data: updatedLead,
+    });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }
