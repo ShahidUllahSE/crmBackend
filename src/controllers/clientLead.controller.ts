@@ -47,15 +47,25 @@ export const createClientLeadController = async (req: CustomRequest, res: Respon
 
 
 // Get all client leads
-export const getAllClientLeadsController = async (_req: Request, res: Response): Promise<any> => {
+export const getAllClientLeadsController = async (req: Request, res: Response): Promise<any> => {
   try {
-    const leads = await getAllClientLeads();
-    return res.status(200).json({ success: true, data: leads });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const leads = await getAllClientLeads(page, limit);
+
+    return res.status(200).json({
+      success: true,
+      message: "Client leads fetched successfully",
+      ...leads, // includes: totalItems, data, totalPages, currentPage
+    });
   } catch (error: any) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
-
 // Get client leads by order ID
 export const getClientLeadsByOrder = async (req: Request, res: Response): Promise<any> => {
   try {

@@ -168,12 +168,15 @@ export const deleteOrderByIdController = async (req: CustomRequest, res: Respons
 
 // Get All Orders
 export const getAllOrdersController = async (req: CustomRequest, res: Response): Promise<any> => {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+
   try {
-    const orders = await getAllOrders();
+    const orders = await getAllOrders(page, limit);
 
     return res.status(200).json({
       success: true,
-      data: orders,
+      ...orders, // includes data, totalItems, totalPages, currentPage etc. from getPagingData
     });
   } catch (error: any) {
     return res.status(400).json({
@@ -182,6 +185,7 @@ export const getAllOrdersController = async (req: CustomRequest, res: Response):
     });
   }
 };
+
 
 // Block or Unblock Order by ID
 export const setOrderBlockStatusController = async (req: CustomRequest, res: Response): Promise<any> => {

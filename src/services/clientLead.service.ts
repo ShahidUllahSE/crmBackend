@@ -1,6 +1,7 @@
 import ClientLead, { ClientLeadCreationAttributes } from "../models/clientLead.model";
 import Campaign from "../models/campaign.model"; // import your Campaign model
 import Order from "../models/order.model"; // import your Order model
+import { getPagination, getPagingData } from "../utils/paginate";
 
 // Create a new client lead
 export const createClientLead = async (leadData: ClientLeadCreationAttributes) => {
@@ -38,14 +39,23 @@ export const getClientLeadById = async (id: number) => {
 };
 
 // Get all client leads, including full campaign & order data
-export const getAllClientLeads = async () => {
-  const leads = await ClientLead.findAll({
+export const getAllClientLeads = async (
+  page: number = 1,
+  limit: number = 10
+) => {
+  const { offset } = getPagination({ page, limit });
+
+  const data = await ClientLead.findAndCountAll({
+    offset,
+    limit,
     include: [
       { model: Campaign, as: "campaign" },
       { model: Order, as: "order" },
     ],
+    order: [["createdAt", "DESC"]],
   });
-  return leads;
+
+  return getPagingData(data, page, limit);
 };
 
 // Update a client lead by ID
