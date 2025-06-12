@@ -6,6 +6,7 @@ import {
   getAllClientLeads,
   updateClientLeadById,
   deleteClientLeadById,
+  updateClientLeadStatus,
 } from "../services/clientLead.service";
 import { CustomRequest } from "../types/custom";
 
@@ -162,6 +163,40 @@ export const deleteClientLead = async (
 
     const result = await deleteClientLeadById(Number(id));
     return res.status(200).json({ success: true, message: result.message });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Accept or Reject client lead
+export const updateClientLeadStatusController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!id || isNaN(Number(id))) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid lead ID parameter" });
+    }
+
+    if (!status || !["accepted", "rejected"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status. Allowed values: 'accepted', 'rejected'",
+      });
+    }
+
+    const result = await updateClientLeadStatus(Number(id), status as "accepted" | "rejected");
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result.lead,
+    });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }

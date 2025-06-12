@@ -1,6 +1,6 @@
 import ClientLead, { ClientLeadCreationAttributes } from "../models/clientLead.model";
-import Campaign from "../models/campaign.model"; // import your Campaign model
-import Order from "../models/order.model"; // import your Order model
+import Campaign from "../models/campaign.model";
+import Order from "../models/order.model";
 import { getPagination, getPagingData } from "../utils/paginate";
 
 // Create a new client lead
@@ -27,7 +27,7 @@ export const getClientLeadsByOrderId = async (orderId: number) => {
   return leads;
 };
 
-// Get a single client lead by ID, including full campaign & order data
+// Get a single client lead by ID
 export const getClientLeadById = async (id: number) => {
   const lead = await ClientLead.findByPk(id, {
     include: [
@@ -38,11 +38,8 @@ export const getClientLeadById = async (id: number) => {
   return lead;
 };
 
-// Get all client leads, including full campaign & order data
-export const getAllClientLeads = async (
-  page: number = 1,
-  limit: number = 10
-) => {
+// Get all client leads with pagination
+export const getAllClientLeads = async (page: number = 1, limit: number = 10) => {
   const { offset } = getPagination({ page, limit });
 
   const data = await ClientLead.findAndCountAll({
@@ -81,4 +78,18 @@ export const deleteClientLeadById = async (id: number) => {
 
   await lead.destroy();
   return { message: "Client lead deleted successfully" };
+};
+
+// Accept or Reject a client lead (status update)
+export const updateClientLeadStatus = async (
+  id: number,
+  status: "accepted" | "rejected"
+) => {
+  const lead = await ClientLead.findByPk(id);
+  if (!lead) {
+    throw new Error("Client lead not found");
+  }
+
+  await lead.update({ status });
+  return { message: `Client lead ${status} successfully`, lead };
 };
