@@ -100,26 +100,33 @@ export const createCampaignn = async (
 
 
 // ✅ Get all campaigns, grouped by campaignName
-export const getAllCampaigns = async (
-  _req: Request,
-  res: Response
-): Promise<any> => {
+export const getAllCampaigns = async (req: Request, res: Response): Promise<any> => {
   try {
-    const campaigns = await CampaignService.getAllCampaigns();
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
-    if (!campaigns || campaigns.length === 0) {
+    const campaignsResult = await CampaignService.getAllCampaigns({ page, limit });
+
+    if (!campaignsResult || campaignsResult.data.length === 0) {
       return res.status(404).json({ message: "No campaigns found" });
     }
 
     // Group fields by campaignName
-    const grouped = campaigns.reduce((acc: any, field: any) => {
+    const grouped = campaignsResult.data.reduce((acc: any, field: any) => {
       const name = field.campaignName;
       if (!acc[name]) acc[name] = [];
       acc[name].push(field);
       return acc;
     }, {});
 
-    return res.status(200).json(grouped);
+    return res.status(200).json({
+      success: true,
+      message: "Campaigns fetched successfully",
+      groupedCampaigns: grouped,
+      totalItems: campaignsResult.totalItems,
+      totalPages: campaignsResult.totalPages,
+      currentPage: campaignsResult.currentPage,
+    });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
@@ -156,8 +163,7 @@ export const updateCampaign = async (
     const { id } = req.params;
     const data = req.body;
 
-    // Since id might not be reliable for campaign identification, use campaignName
-    // Alternatively, modify to use a campaign ID (see Step 3)
+ 
     const updated = await CampaignService.updateCampaign(Number(id), data);
     if (!updated) {
       return res.status(404).json({ message: "Campaign not found" });

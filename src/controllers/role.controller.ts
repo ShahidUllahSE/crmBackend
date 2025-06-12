@@ -18,15 +18,25 @@ export const createRoleController = async (
   }
 };
 
-export const getRolesController = async (
-  _req: Request,
-  res: Response
-): Promise<any> => {
+export const getRolesController = async (req: Request, res: Response): Promise<any> => {
   try {
-    const roles = await getAllRolesWithPermissions();
-    return res.status(200).json({ roles });
+    // Extract page and limit from query params and convert to number
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const paginatedRoles = await getAllRolesWithPermissions({ page, limit });
+
+    return res.status(200).json({
+      success: true,
+      message: "Roles retrieved successfully!",
+      ...paginatedRoles, // includes totalItems, data, totalPages, currentPage
+    });
   } catch (error: any) {
-    return res.status(500).json({ message: error.message });
+    console.error("Error fetching roles:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
   }
 };
 

@@ -2,7 +2,12 @@ import Lead, {
   LeadAttributes,
   LeadCreationAttributes,
 } from "../models/lead.model";
+import { getPagination, getPagingData } from "../utils/paginate";
 
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
 // Create Lead
 export const createLead = async (
   data: LeadCreationAttributes
@@ -16,10 +21,17 @@ export const createLead = async (
 };
 
 // Get All Leads
-export const getAllLeads = async (): Promise<LeadAttributes[]> => {
+
+export const getAllLeads = async ({ page = 1, limit = 10 }: PaginationParams) => {
   try {
-    const leads = await Lead.findAll();
-    return leads.map((lead) => lead.get());
+    const { offset, limit: pageLimit } = getPagination({ page, limit });
+
+    const data = await Lead.findAndCountAll({
+      offset,
+      limit: pageLimit,
+    });
+
+    return getPagingData(data, page, pageLimit);
   } catch (error: any) {
     throw new Error(`Error fetching leads: ${error.message}`);
   }

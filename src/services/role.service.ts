@@ -1,6 +1,7 @@
 import Role from "../models/role.model";
 import Permission from "../models/permission.model";
 import RolePermission from "../models/rolePermission.model";
+import { getPagination, getPagingData } from "../utils/paginate";
 
 // Service to create a role and associate permissions
 export const createRole = async (roleData: {
@@ -73,8 +74,20 @@ export const createRole = async (roleData: {
   }
 };
 
-export const getAllRolesWithPermissions = async () => {
-  const roles = await Role.findAll({
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export const getAllRolesWithPermissions = async ({
+  page = 1,
+  limit = 10,
+}: PaginationParams) => {
+  const { offset } = getPagination({ page, limit });
+
+  const result = await Role.findAndCountAll({
+    offset,
+    limit,
     include: [
       {
         model: Permission,
@@ -82,8 +95,10 @@ export const getAllRolesWithPermissions = async () => {
       },
     ],
   });
-  return roles;
+
+  return getPagingData(result, page, limit);
 };
+
 
 export const updateRolePermissions = async (
   roleId: number,
@@ -102,7 +117,7 @@ export const updateRolePermissions = async (
   }));
   await RolePermission.bulkCreate(newMappings);
 
-  return await getAllRolesWithPermissions();
+  return await getAllRolesWithPermissions({ page: 1, limit: 10 });
 };
 
 export const deleteRole = async (roleId: number) => {

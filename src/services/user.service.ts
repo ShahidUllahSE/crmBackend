@@ -5,6 +5,12 @@ import jwt from "jsonwebtoken";
 import { logActivity } from "./activity.service";
 import { sendNotification } from "./notification.service";
 import Role from "../models/role.model";
+import { getPagination, getPagingData } from "../utils/paginate";
+
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
 
 export const createUser = async (
   userData: Partial<UserAttributes>
@@ -130,8 +136,13 @@ export const getUserById = async (userId: number): Promise<any> => {
   return user;
 };
 
-export const getAllUsers = async (): Promise<any[]> => {
-  const users = await User.findAll({
+
+export const getAllUsers = async ({ page = 1, limit = 10 }: PaginationParams): Promise<any> => {
+  const { offset, limit: pageLimit } = getPagination({ page, limit });
+
+  const data = await User.findAndCountAll({
+    offset,
+    limit: pageLimit,
     include: [
       {
         model: Role,
@@ -141,7 +152,7 @@ export const getAllUsers = async (): Promise<any[]> => {
     ],
   });
 
-  return users;
+  return getPagingData(data, page, pageLimit);
 };
 
 export const updateUser = async (

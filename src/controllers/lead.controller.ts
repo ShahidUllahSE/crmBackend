@@ -18,10 +18,17 @@ export const createLead = async (req: Request, res: Response): Promise<any> => {
 };
 
 // Get All Leads
-export const getAllLeads = async (_req: Request, res: Response): Promise<any> => {
+export const getAllLeads = async (req: Request, res: Response): Promise<any> => {
   try {
-    const leads = await LeadService.getAllLeads();
-    return res.status(200).json(leads);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const leads = await LeadService.getAllLeads({ page, limit });
+
+    return res.status(200).json({
+      message: "Leads fetched successfully",
+      ...leads, // includes totalItems, data, totalPages, currentPage
+    });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }

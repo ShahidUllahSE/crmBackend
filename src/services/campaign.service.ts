@@ -3,7 +3,12 @@ import {
   CampaignAttributes,
   CampaignCreationAttributes,
 } from "../models/campaign.model";
+import { getPagination, getPagingData } from "../utils/paginate";
 
+interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
 // export const createCampaign = async (
 //   data: CampaignCreationAttributes[]
 // ): Promise<CampaignAttributes[]> => {
@@ -65,10 +70,19 @@ export const createCampaign = async (
   }
 };
 
-export const getAllCampaigns = async (): Promise<CampaignAttributes[]> => {
+export const getAllCampaigns = async ({
+  page = 1,
+  limit = 10,
+}: PaginationParams) => {
   try {
-    const campaigns = await Campaign.findAll();
-    return campaigns.map((c) => c.get());
+    const { offset, limit: pageLimit } = getPagination({ page, limit });
+
+    const result = await Campaign.findAndCountAll({
+      offset,
+      limit: pageLimit,
+    });
+
+    return getPagingData(result, page, pageLimit);
   } catch (error: any) {
     throw new Error(`Error retrieving campaigns: ${error.message}`);
   }

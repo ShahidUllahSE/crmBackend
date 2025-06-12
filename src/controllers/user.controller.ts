@@ -45,16 +45,28 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 };
 
 // Get all users
+
 export const getUsers = async (req: Request, res: Response): Promise<any> => {
   try {
-    const users = await getAllUsers();
-    return res.status(200).json({ message: "Users retrieved successfully!", users });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const paginatedUsers = await getAllUsers({ page, limit });
+
+    return res.status(200).json({
+      success: true,
+      message: "Users retrieved successfully!",
+      ...paginatedUsers, // includes totalItems, data, totalPages, currentPage
+    });
   } catch (error) {
     console.error("Error fetching users:", error);
-    return res.status(500).json({ message: "Internal Server Error", error: (error as Error).message });
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: (error as Error).message,
+    });
   }
 };
-
 // Get single user by ID
 export const getUser = async (req: Request, res: Response): Promise<any> => {
   try {
