@@ -32,4 +32,6 @@ export const PERMISSIONS = {
   CLIENT_LEAD_GET_BY_ID: "clientLead:getById",
   CLIENT_LEAD_UPDATE: "clientLead:update",
   CLIENT_LEAD_DELETE: "clientLead:delete",
+  CLIENT_LEAD_UPDATE_STATUS: "clientLead:updateStatus",
+
 };
