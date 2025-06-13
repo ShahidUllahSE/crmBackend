@@ -9,6 +9,21 @@ export const createClientLead = async (leadData: ClientLeadCreationAttributes) =
   return lead;
 };
 
+
+// export const createClientLead = async (leadData: ClientLeadCreationAttributes) => {
+//   const lead = await ClientLead.create(leadData);
+
+//   // After creating lead, decrement the requested_leads in the associated order
+//   const order = await Order.findByPk(leadData.order_id);
+//   if (order) {
+//     // Ensure requested_leads doesn't go below zero
+//     const newRequestedLeads = Math.max(0, (order. lead_requested ?? 1) - 1);
+//     await order.update({  lead_requested: newRequestedLeads });
+//   }
+
+//   return lead;
+// };
+
 // Get all client leads for a specific order, including full campaign & order data
 export const getClientLeadsByOrderId = async (orderId: number) => {
   const leads = await ClientLead.findAll({

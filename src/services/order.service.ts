@@ -2,8 +2,9 @@ import { OrderAttributes } from "../models/order.model";
 import Order from "../models/order.model";
 import Campaign from "../models/campaign.model";
 import { getPagination, getPagingData } from "../utils/paginate";
+import ClientLead from "../models/clientLead.model"; // 👈 Import this
+import { Sequelize } from "sequelize";
 
-// DTO for creating an order
 export interface CreateOrderDTO {
   agent: string;
   campaign_id: number;
@@ -69,8 +70,6 @@ export const createOrder = async (
 };
 
 
-
-
 export const getOrderById = async (
   id: number
 ): Promise<OrderAttributes & { campaign?: any } | null> => {
@@ -132,6 +131,36 @@ export const deleteOrderById = async (id: number): Promise<boolean> => {
     throw new Error(error.message || "Failed to delete order");
   }
 };
+// export const getAllOrders = async (
+//   page: number = 1,
+//   limit: number = 10
+// ): Promise<ReturnType<typeof getPagingData>> => {
+//   try {
+//     const { offset, limit: pageLimit } = getPagination({ page, limit });
+
+//     const result = await Order.findAndCountAll({
+//       offset,
+//       limit: pageLimit,
+//       include: [
+//         {
+//           model: Campaign,
+//           as: "campaign",
+//         },
+//       ],
+//       order: [["created_at", "DESC"]], // optional: sort by date
+//     });
+
+//     return getPagingData(result, page, pageLimit);
+//   } catch (error: any) {
+//     throw new Error(error.message || "Failed to fetch paginated orders");
+//   }
+// };
+
+
+
+
+
+
 export const getAllOrders = async (
   page: number = 1,
   limit: number = 10
@@ -139,6 +168,7 @@ export const getAllOrders = async (
   try {
     const { offset, limit: pageLimit } = getPagination({ page, limit });
 
+    // Fetch orders
     const result = await Order.findAndCountAll({
       offset,
       limit: pageLimit,
@@ -148,14 +178,55 @@ export const getAllOrders = async (
           as: "campaign",
         },
       ],
-      order: [["created_at", "DESC"]], // optional: sort by date
+      order: [["created_at", "DESC"]],
     });
 
-    return getPagingData(result, page, pageLimit);
+    const orderIds = result.rows.map((order) => order.id);
+
+    // Fetch lead counts grouped by order_id
+    const leadCounts = await ClientLead.findAll({
+      attributes: [
+        "order_id",
+        [Sequelize.fn("COUNT", Sequelize.col("id")), "leadCount"],
+      ],
+      where: {
+        order_id: orderIds,
+      },
+      group: ["order_id"],
+      raw: true,
+    });
+
+    // Convert to map
+    const leadCountMap = leadCounts.reduce((acc, curr) => {
+      const orderId = curr.order_id as number;
+      const leadCount = parseInt((curr as any).leadCount); // ✅ Fix 2: Cast to any
+      acc[orderId] = leadCount;
+      return acc;
+    }, {} as Record<number, number>);
+
+    // Append remainingLeads to each order
+    const rowsWithRemainingLeads = result.rows.map((order) => {
+      const orderJson = order.toJSON() as OrderAttributes & { campaign?: any };
+      const usedLeads = leadCountMap[order.id] || 0;
+      const remainingLeads = Math.max(0, (orderJson.lead_requested || 0) - usedLeads);
+
+      return {
+        ...orderJson,
+        remainingLeads,
+      };
+    });
+
+    return getPagingData(
+      { count: result.count, rows: rowsWithRemainingLeads },
+      page,
+      pageLimit
+    );
   } catch (error: any) {
     throw new Error(error.message || "Failed to fetch paginated orders");
   }
 };
+
+
 // Unified function to set block status
 export const setOrderBlockStatus = async (
   id: number,
